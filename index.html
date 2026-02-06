@@ -2,16 +2,30 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 1. 優化視窗設定：禁止縮放、適配瀏海螢幕 (viewport-fit=cover) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- 2. iOS Safari 專用設定：全螢幕模式 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="大阪旅遊">
+    
+    <!-- Android Chrome 專用設定 -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#f97316"> <!-- 設定狀態列顏色 (橘色) -->
+
     <title>大阪旅遊攻略 2026</title>
     
-    <!-- 引入 Tailwind CSS (美化樣式) -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 3. 設定 App 圖示 (使用章魚 Emoji 當作臨時圖示) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐙</text></svg>">
+    <link rel="apple-touch-icon" href="icon.png"> <!-- 如果您有 icon.png，請放在同一資料夾，iPhone 會優先使用 -->
     
-    <!-- 引入 Babel (讓瀏覽器看懂 React) -->
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- 設定 Import Map (告訴瀏覽器去哪裡抓 React 和圖示庫) -->
+    <!-- 設定 Import Map -->
     <script type="importmap">
     {
         "imports": {
@@ -35,8 +49,26 @@
             background-color: #cbd5e1;
             border-radius: 20px;
         }
+        
         body {
-            background-color: #fff7ed; /* orange-50 similar */
+            background-color: #fff7ed;
+            /* 讓 App 內容避開 iPhone 底部橫條與上方瀏海 */
+            padding-bottom: env(safe-area-inset-bottom); 
+            /* 禁止長按選取文字 (讓感覺更像 App)，除了輸入框和特定文字區 */
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent; /* 移除點擊時的灰色背景 */
+        }
+
+        /* 允許特定區域選取文字 (如日語手指通、地址) */
+        .select-text {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        /* 讓 Header 避開狀態列 */
+        header {
+            padding-top: env(safe-area-inset-top);
         }
     </style>
 </head>
@@ -47,7 +79,6 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
-        /* 確保引入所有需要的圖示，包含 Ticket */
         import { 
             Plane, Train, Luggage, Camera, ShoppingBag, 
             Utensils, Moon, Ship, Star, Fish, Bird, Flame, 
@@ -228,7 +259,7 @@
                     { time: "15:00", title: "民宿 Check-in", desc: "吃飽剛好進房放行李、稍微整理儀容。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" },
                     { time: "16:00", title: "通天閣 & 新世界散策", desc: "沒有行李一身輕，逛逛復古街道。", icon: <Camera/>, mapQuery: "Tsutenkaku" },
                     { time: "17:30", title: "阿倍野 HARUKAS 300", desc: "步行或地鐵一站至天王寺，欣賞絕美日落與夜景。", icon: <Moon/>, mapQuery: "Harukas 300" },
-                    /* 修改：先吃晚餐，吃飽好搬貨，且更換已閉店的「燒肉平和」為「燒肉萬野」 */
+                    /* 修改：18:30 晚餐，燒肉萬野 (替代已閉店的燒肉平和) */
                     { 
                     time: "18:30", title: "【晚餐建議】天王寺必吃", 
                     isMeal: true,
@@ -237,7 +268,7 @@
                         { name: "千房大阪燒", desc: "阿倍野 Q's Mall 店，經典大阪味。", tag: "經典必吃" }
                     ]
                     },
-                    /* 修改：晚餐後逛 Bic Camera */
+                    /* 修改：20:00 逛 Bic Camera，注意21:00關門 */
                     { time: "20:00", title: "Bic Camera 阿倍野店", desc: "就在隔壁 Q's Mall 裡面！吃飽搬貨剛好，記得只營業到 21:00 喔！", icon: <ShoppingBag/>, mapQuery: "Bic Camera Abeno Q's Mall Store" },
                     { time: "21:30", title: "唐吉訶德 新世界店", desc: "就在通天閣旁，買完直接扛回民宿，超方便。", icon: <ShoppingBag/>, mapQuery: "MEGA Don Quijote Shinsekai" },
                     { time: "23:00", title: "返回民宿休息", desc: "唐吉訶德過個馬路就到家，整理戰利品準備睡覺。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" }
@@ -336,7 +367,6 @@
                         { name: "Kijji (きじ) 大阪燒", desc: "梅田藍天大廈B1，老店。", tag: "排隊名店" }
                     ]
                     },
-                    /* Add this: 補上 Day 4 回民宿行程 */
                     { time: "22:00", title: "返回民宿休息", desc: "搭地鐵谷町線轉堺筋線(南森町轉乘)回惠美須町，整理行李準備明天退房。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" }
                 ]
                 },
@@ -706,7 +736,7 @@
                 {showTextModal && (
                     <div className="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-6 cursor-pointer" onClick={() => setShowTextModal(null)}>
                     <div className="text-center w-full px-4">
-                        <p className="text-white text-3xl md:text-5xl font-black leading-tight mb-8 whitespace-pre-wrap">{showTextModal}</p>
+                        <p className="text-white text-3xl md:text-5xl font-black leading-tight mb-8 whitespace-pre-wrap select-text">{showTextModal}</p>
                         <p className="text-gray-500 text-sm animate-pulse">(點擊任意處關閉)</p>
                     </div>
                     </div>
