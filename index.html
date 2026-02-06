@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大阪旅遊攻略 2026</title>
+    
+    <!-- 引入 Tailwind CSS (美化樣式) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 引入 Babel (讓瀏覽器看懂 React) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- 設定 Import Map (告訴瀏覽器去哪裡抓 React 和圖示庫) -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "lucide-react": "https://esm.sh/lucide-react@0.263.1"
+        }
+    }
+    </script>
+
+    <style>
+        /* 自定義捲軸樣式 */
+        ::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        body {
+            background-color: #fff7ed; /* orange-50 similar */
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- 這裡開始是我們的主要程式碼 -->
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useRef } from 'react';
+        import { createRoot } from 'react-dom/client';
+        /* 確保引入所有需要的圖示，包含 Ticket */
+        import { 
+            Plane, Train, Luggage, Camera, ShoppingBag, 
+            Utensils, Moon, Ship, Star, Fish, Bird, Flame, 
+            MapPin, Info, Check, Trash2, Calculator, 
+            Receipt, Home, Map as MapIcon, ZoomIn, X, ChevronRight,
+            MessageSquare, ShoppingCart, PlusCircle, Smartphone, ExternalLink, Bed, Coffee, Smile,
+            Clock, AlertTriangle, Ticket, Image as ImageIcon, Eye
+        } from 'lucide-react';
+
+        const FIXED_RATE = 0.2085; // 匯率參考
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState(0);
+            const [checkedItems, setCheckedItems] = useState({});
+            const [showTransportModal, setShowTransportModal] = useState(false);
+            const [showHotelModal, setShowHotelModal] = useState(false);
+            const [showMapModal, setShowMapModal] = useState(false);
+            const [showCouponModal, setShowCouponModal] = useState(null);
+            const [showTextModal, setShowTextModal] = useState(null);
+            const [couponFilter, setCouponFilter] = useState('ALL');
+
+            // --- 購物計算機 State ---
+            const [cartItems, setCartItems] = useState([]);
+            const [discountType, setDiscountType] = useState('none');
+            const [calcDisplay, setCalcDisplay] = useState('0');
+            const [prevValue, setPrevValue] = useState(null);
+            const [operator, setOperator] = useState(null);
+            const [waitingForNewValue, setWaitingForNewValue] = useState(false);
+            const scrollRef = useRef(null);
+
+            useEffect(() => {
+                try {
+                const saved = localStorage.getItem('osakaTripProgress_v2');
+                if (saved) setCheckedItems(JSON.parse(saved));
+                
+                const savedCart = localStorage.getItem('osakaTripCart_v2');
+                if (savedCart) setCartItems(JSON.parse(savedCart));
+                } catch (e) {}
+            }, []);
+
+            useEffect(() => {
+                if (scrollRef.current) {
+                scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+                }
+                try { localStorage.setItem('osakaTripCart_v2', JSON.stringify(cartItems)); } catch (e) {}
+            }, [cartItems]);
+
+            const toggleItem = (dayIndex, itemIndex) => {
+                const key = `${dayIndex}-${itemIndex}`;
+                const newChecked = { ...checkedItems, [key]: !checkedItems[key] };
+                setCheckedItems(newChecked);
+                try { localStorage.setItem('osakaTripProgress_v2', JSON.stringify(newChecked)); } catch (e) {}
+            };
+
+            const openGoogleMaps = (query) => {
+                window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
+            };
+
+            // --- 計算機邏輯 ---
+            const inputDigit = (digit) => {
+                if (waitingForNewValue) {
+                setCalcDisplay(String(digit));
+                setWaitingForNewValue(false);
+                } else {
+                setCalcDisplay(calcDisplay === '0' ? String(digit) : calcDisplay + digit);
+                }
+            };
+
+            const inputDot = () => {
+                if (waitingForNewValue) {
+                setCalcDisplay('0.');
+                setWaitingForNewValue(false);
+                } else if (calcDisplay.indexOf('.') === -1) {
+                setCalcDisplay(calcDisplay + '.');
+                }
+            };
+
+            const clearCalc = () => {
+                setCalcDisplay('0');
+                setPrevValue(null);
+                setOperator(null);
+                setWaitingForNewValue(false);
+            };
+
+            const handleDelete = () => {
+                if (waitingForNewValue) return;
+                setCalcDisplay(calcDisplay.length > 1 ? calcDisplay.slice(0, -1) : '0');
+            };
+
+            const performOperation = (nextOperator) => {
+                const inputValue = parseFloat(calcDisplay);
+                if (prevValue === null) {
+                setPrevValue(inputValue);
+                } else if (operator) {
+                const currentValue = prevValue || 0;
+                const newValue = calculate(currentValue, inputValue, operator);
+                setPrevValue(newValue);
+                setCalcDisplay(String(newValue));
+                }
+                setWaitingForNewValue(true);
+                setOperator(nextOperator);
+            };
+
+            const calculate = (prev, next, op) => {
+                switch (op) {
+                case '+': return prev + next;
+                case '-': return prev - next;
+                case '×': return prev * next;
+                case '÷': return prev / next;
+                default: return next;
+                }
+            };
+
+            const addResultToCart = () => {
+                let finalValue = parseFloat(calcDisplay);
+                if (operator && prevValue !== null && !waitingForNewValue) {
+                finalValue = calculate(prevValue, finalValue, operator);
+                }
+                if (finalValue > 0) {
+                setCartItems([...cartItems, Math.round(finalValue)]);
+                clearCalc();
+                }
+            };
+
+            const getDiscountInfo = () => {
+                const basePrice = cartItems.reduce((acc, curr) => acc + curr, 0);
+                const taxFreePrice = Math.round(basePrice / 1.1); // 假設輸入的是含稅價，反推未稅
+                let rate = 0; let label = "目前價格 (含稅)"; let color = "bg-white border-gray-200";
+                
+                switch(discountType) {
+                case 'taxfree': rate = 0.00; label = "僅免稅 (Tax Free)"; color = "bg-gray-50 border-gray-400"; break;
+                case 'elec': rate = 0.07; label = "家電優惠 (免稅+7%)"; color = "bg-red-50 border-red-200"; break;
+                case 'drug': rate = 0.05; label = "藥妝優惠 (免稅+5%)"; color = "bg-green-50 border-green-200"; break;
+                case 'dept': rate = 0.05; label = "百貨優惠 (免稅+5%)"; color = "bg-purple-50 border-purple-200"; break;
+                default: break;
+                }
+                
+                const finalJpy = discountType === 'none' ? basePrice : Math.round(taxFreePrice * (1 - rate));
+                const finalTwd = Math.round(finalJpy * FIXED_RATE);
+                const savedTwd = Math.round(basePrice * FIXED_RATE) - finalTwd;
+                
+                return { label, finalJpy, finalTwd, savedTwd, color, basePrice };
+            };
+
+            const discountInfo = getDiscountInfo();
+
+            const tabs = [
+                { name: "Day 1", short: "D1", icon: <Plane size={18}/> },
+                { name: "Day 2", short: "D2", icon: <Bird size={18}/> },
+                { name: "Day 3", short: "D3", icon: <Star size={18}/> },
+                { name: "Day 4", short: "D4", icon: <Camera size={18}/> },
+                { name: "Day 5", short: "D5", icon: <Luggage size={18}/> },
+                { name: "優惠券", short: "折價", icon: <Receipt size={18}/> },
+                { name: "實用日語", short: "日語", icon: <MessageSquare size={18}/> },
+                { name: "2026購物", short: "清單", icon: <ShoppingCart size={18}/> },
+                { name: "計算機", short: "計算", icon: <Calculator size={18}/> }
+            ];
+
+            const itinerary = [
+                {
+                date: "2/11 (週三)",
+                title: "Day 1: 抵達 & 新世界/阿倍野",
+                transport: "南海電鐵 (天下茶屋轉乘)",
+                theme: "from-amber-600 to-yellow-500",
+                alert: "導遊：這中間沒有空檔！11:30落地，到市區剛好是午餐與Check-in時間。",
+                spots: [
+                    { time: "11:30", title: "飛機抵達關西機場", desc: "表定時間。通常需要 1 小時通關領行李。", icon: <Plane/>, mapQuery: "Kansai Airport" },
+                    { time: "12:45", title: "搭乘南海電鐵", desc: "買票、上廁所後搭車。車程約 40 分鐘。", icon: <Train/>, mapQuery: "Kansai Airport Station" },
+                    { time: "13:40", title: "抵達天下茶屋/惠美須町", desc: "轉乘或搭計程車到民宿附近。此時已快下午兩點。", icon: <MapPin/>, mapQuery: "Tengachaya Station" },
+                    { 
+                    time: "14:00", title: "【午餐】新世界必吃", 
+                    isMeal: true,
+                    options: [
+                        { name: "八重勝串炸", desc: "不用趕路，悠閒吃大阪名物。", tag: "就在旁邊" },
+                        { name: "千歲肉吸", desc: "在地人的暖胃牛肉湯，只開中午。", tag: "巷弄美食" }
+                    ]
+                    },
+                    { time: "15:00", title: "民宿 Check-in", desc: "吃飽剛好進房放行李、稍微整理儀容。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" },
+                    { time: "16:00", title: "通天閣 & 新世界散策", desc: "沒有行李一身輕，逛逛復古街道。", icon: <Camera/>, mapQuery: "Tsutenkaku" },
+                    { time: "17:30", title: "阿倍野 HARUKAS 300", desc: "步行或地鐵一站至天王寺，欣賞絕美日落與夜景。", icon: <Moon/>, mapQuery: "Harukas 300" },
+                    /* 修改：先吃晚餐，吃飽好搬貨，且更換已閉店的「燒肉平和」為「燒肉萬野」 */
+                    { 
+                    time: "18:30", title: "【晚餐建議】天王寺必吃", 
+                    isMeal: true,
+                    options: [
+                        { name: "燒肉 萬野 (Tennoji)", desc: "肉舖直營超人氣燒肉，肉質鮮美。(原燒肉平和已閉店)", tag: "在地推薦" },
+                        { name: "千房大阪燒", desc: "阿倍野 Q's Mall 店，經典大阪味。", tag: "經典必吃" }
+                    ]
+                    },
+                    /* 修改：晚餐後逛 Bic Camera */
+                    { time: "20:00", title: "Bic Camera 阿倍野店", desc: "就在隔壁 Q's Mall 裡面！吃飽搬貨剛好，記得只營業到 21:00 喔！", icon: <ShoppingBag/>, mapQuery: "Bic Camera Abeno Q's Mall Store" },
+                    { time: "21:30", title: "唐吉訶德 新世界店", desc: "就在通天閣旁，買完直接扛回民宿，超方便。", icon: <ShoppingBag/>, mapQuery: "MEGA Don Quijote Shinsekai" },
+                    { time: "23:00", title: "返回民宿休息", desc: "唐吉訶德過個馬路就到家，整理戰利品準備睡覺。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" }
+                ]
+                },
+                {
+                date: "2/12 (週四)",
+                title: "Day 2: 奈良鹿 & 神社 & 貓頭鷹",
+                transport: "近鐵 + 計程車 (刷ICOCA)",
+                theme: "from-red-500 to-orange-500",
+                alert: "重要：為了讓貓頭鷹玩好玩滿，奈良13:30一定要離開喔！",
+                spots: [
+                    { time: "09:00", title: "出發前往奈良", desc: "從「近鐵日本橋」站搭快速急行直達奈良(約40分)。", icon: <Train/>, mapQuery: "Kintetsu-Nippombashi Station" },
+                    { time: "10:00", title: "奈良公園 & 餵鹿", desc: "重點放在公園餵鹿拍照，享受悠閒上午。", icon: <Camera/>, mapQuery: "Nara Park" },
+                    { 
+                    time: "12:00", title: "【午餐建議】奈良商店街", 
+                    isMeal: true,
+                    options: [
+                        { name: "志津香釜飯", desc: "若排隊太長建議放棄，改吃其他。", tag: "超人氣" },
+                        { name: "中谷堂搗麻糬", desc: "買個點心帶著走，節省時間。", tag: "必看" }
+                    ]
+                    },
+                    { time: "13:30", title: "搭車返回大阪難波", desc: "【關鍵時刻】要趕回去神社跟貓頭鷹，這時間得上車。", icon: <Train/>, mapQuery: "Kintetsu Nara Station" },
+                    { time: "14:30", title: "難波八阪神社", desc: "巨大獅子頭必拍！離難波站走路約10分。", icon: <Camera/>, mapQuery: "Namba Yasaka Shrine" },
+                    { time: "15:30", title: "搭車前往貓頭鷹咖啡", desc: "直接搭計程車(約10分，車資¥1200左右)，多人分擔很划算。", icon: <Bird/>, mapQuery: "Happy Owl Cafe chouette Osaka" },
+                    { time: "16:00", title: "Happy Owl Cafe chouette", desc: "【預約1hr】享受完整的療癒時光，零距離互動。", icon: <Star/>, mapQuery: "Happy Owl Cafe chouette Osaka" },
+                    { time: "17:30", title: "心齋橋 & 道頓堀", desc: "從咖啡廳一路往南逛，終點是跑跑人看板。", icon: <ShoppingBag/>, mapQuery: "Dotonbori Glico Sign" },
+                    /* 修改：18:00 晚餐 */
+                    { 
+                    time: "18:00", title: "【晚餐建議】燒肉之夜", 
+                    isMeal: true,
+                    options: [
+                        { name: "燒肉力丸 (難波道頓堀店)", desc: "推薦！就在跑跑人看板旁，逛完直接吃。", tag: "不用走回頭路" },
+                        { name: "國產牛燒肉 Aburiya", desc: "需提前預約，肉質佳。", tag: "高評價" }
+                    ]
+                    },
+                    /* 修改：20:00 逛 Bic Camera，注意21:00關門 */
+                    { time: "20:00", title: "Bic Camera 難波店", desc: "吃飽後散步去逛電器！就在千日前通，注意 21:00 關門。", icon: <ShoppingBag/>, mapQuery: "Bic Camera Namba Store" },
+                    { time: "22:00", title: "返回民宿休息", desc: "吃飽從難波站搭地鐵(日本橋→惠美須町)或計程車回民宿，養精蓄銳。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" }
+                ]
+                },
+                {
+                date: "2/13 (週五)",
+                title: "Day 3: USJ 環球影城全日",
+                transport: "JR 環狀線 (西九條轉乘)",
+                theme: "from-blue-600 to-indigo-600",
+                alert: "重點：早起！早起！早起！",
+                spots: [
+                    { time: "06:30", title: "出發！", desc: "從新今宮搭JR環狀線到西九條，轉夢咲線。", icon: <Star/>, mapQuery: "Universal City Station" },
+                    { time: "07:30", title: "排隊入園", desc: "通常比公告時間提早開門，衝瑪利歐或哈利波特。", icon: <Check/>, mapQuery: "USJ" },
+                    { 
+                    time: "12:30", title: "【午餐】園區內覓食", 
+                    isMeal: true,
+                    options: [
+                        { name: "奇諾比奧咖啡", desc: "超級瑪利歐區，需整理券。", tag: "超可愛" },
+                        { name: "三根掃帚", desc: "哈利波特區，烤雞好吃。", tag: "氣氛佳" }
+                    ]
+                    },
+                    { time: "19:00", title: "欣賞夜間遊行", desc: "依當日官網時間為準。", icon: <Flame/>, mapQuery: "USJ" },
+                    { 
+                    time: "20:30", title: "【晚餐建議】CityWalk 或回市區", 
+                    isMeal: true,
+                    options: [
+                        { name: "Shake Shack", desc: "園區外美式漢堡，快速好吃。", tag: "美式" },
+                        { name: "鳥貴族", desc: "回民宿附近吃平價串燒。", tag: "居酒屋" }
+                    ]
+                    },
+                    { time: "22:00", title: "腿廢掉回民宿", desc: "搭計程車回民宿約 ¥5000，多人分擔很划算。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" }
+                ]
+                },
+                {
+                date: "2/14 (週六)",
+                title: "Day 4: 大阪城與梅田繁華",
+                transport: "地鐵 (建議買一日券)",
+                theme: "from-green-600 to-emerald-500",
+                alert: "注意：梅田是 Yodobashi 的地盤(無Bic Camera)，若堅持用優惠券請改去難波店。",
+                spots: [
+                    { time: "10:00", title: "大阪城天守閣", desc: "地鐵森之宮或谷町四丁目站。建議先去換御座船的票。", icon: <Camera/>, mapQuery: "Osaka Castle" },
+                    { time: "11:30", title: "大阪城御座船", desc: "搭乘黃金船遊護城河，從水面欣賞石垣(約20分鐘)。", icon: <Ship/>, mapQuery: "Osaka Castle Gozabune Pier" },
+                    { 
+                    time: "12:30", title: "【午餐建議】JO-TERRACE", 
+                    isMeal: true,
+                    options: [
+                        { name: "得正咖哩烏龍麵", desc: "大阪城公園店，濃郁好吃。", tag: "烏龍麵" },
+                        { name: "Gram 鬆餅", desc: "限定厚鬆餅，公園店營業中。", tag: "甜點" }
+                    ]
+                    },
+                    { time: "14:30", title: "梅田商圈 (LUCUA/大丸)", desc: "任天堂中心(大丸13F)、逛街戰區。", icon: <ShoppingBag/>, mapQuery: "Daimaru Umeda" },
+                    { time: "16:00", title: "Yodobashi Camera 梅田", desc: "就在車站旁！雖然不能用Bic券，但比Bic更大間，超級好逛。", icon: <ShoppingBag/>, mapQuery: "Yodobashi Camera Multimedia Umeda" },
+                    { time: "18:00", title: "梅田藍天大廈", desc: "空中庭園展望台，看夜景。", icon: <Moon/>, mapQuery: "Umeda Sky Building" },
+                    { 
+                    time: "20:00", title: "【晚餐建議】梅田美食", 
+                    isMeal: true,
+                    options: [
+                        { name: "魚心壽司 (Uoshin)", desc: "料比飯大三倍！巨無霸壽司超滿足。(原龜壽司總本店已閉店)", tag: "大份量首選" },
+                        { name: "Kijji (きじ) 大阪燒", desc: "梅田藍天大廈B1，老店。", tag: "排隊名店" }
+                    ]
+                    },
+                    /* Add this: 補上 Day 4 回民宿行程 */
+                    { time: "22:00", title: "返回民宿休息", desc: "搭地鐵谷町線轉堺筋線(南森町轉乘)回惠美須町，整理行李準備明天退房。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" }
+                ]
+                },
+                {
+                date: "2/15 (週日)",
+                title: "Day 5: 市場早餐與 Outlet",
+                transport: "南海電鐵",
+                theme: "from-orange-400 to-yellow-400",
+                spots: [
+                    { time: "09:00", title: "木津市場", desc: "離民宿很近，走路去吃海鮮丼。", icon: <Fish/>, mapQuery: "Kizu Market" },
+                    { time: "11:00", title: "退房 & 前往機場方向", desc: "搭南海電鐵前往臨空城。", icon: <Train/>, mapQuery: "Rinku Town Station" },
+                    { time: "12:00", title: "臨空城 Outlet", desc: "行李寄放車站或遊客中心，最後衝刺。", icon: <ShoppingBag/>, mapQuery: "Rinku Premium Outlets" },
+                    { time: "17:00", title: "前往機場", desc: "搭一站電車即達關西機場。", icon: <Plane/>, mapQuery: "Kansai Airport" },
+                    { time: "18:30", title: "班機起飛", desc: "平安回家！", icon: <Smile/>, mapQuery: "KIX" }
+                ]
+                }
+            ];
+
+            const coupons = [
+                { id: 1, name: "Bic Camera", discount: "10% + 7%", type: "電器", locations: ["難波", "天王寺", "梅田"], img: "bic.jpg" },
+                { id: 2, name: "愛電王 EDION", discount: "10% + 7%", type: "電器", locations: ["難波", "道頓堀"], img: "edion.jpg" },
+                { id: 3, name: "松本清", discount: "10% + 3-7%", type: "藥妝", locations: ["心齋橋", "梅田", "天王寺"], img: "matsukiyo.jpg" },
+                { id: 4, name: "大丸百貨", discount: "5% OFF", type: "百貨", locations: ["心齋橋", "梅田"], img: "daimaru.jpg" },
+                { id: 5, name: "SUGI 杉藥局", discount: "10% + 4-8%", type: "藥妝", locations: ["道頓堀", "新世界"], img: "sugi.jpg" },
+                { id: 6, name: "YAMADA 電機", discount: "10% + 7%", type: "電器", locations: ["難波"], img: "yamada.jpg" }
+            ];
+
+            // 新增：地圖資料 (整合舊版功能) - 加上圖片檔案連結
+            const maps = [
+                { name: "JR 西日本路線圖", link: "https://www.westjr.co.jp/global/tc/timetable/pdf/map_kansai.pdf", img: "map_jr.jpg", color: "bg-blue-50 border-blue-200 text-blue-800" },
+                { name: "大阪地鐵路線圖", link: "https://subway.osakametro.co.jp/en/guide/routemap.php", img: "map_metro.jpg", color: "bg-red-50 border-red-200 text-red-800" },
+                { name: "南海電鐵路線圖", link: "https://www.nankai.co.jp/traffic/railmap.html", img: "map_nankai.jpg", color: "bg-orange-50 border-orange-200 text-orange-800" }
+            ];
+
+            const jpPhrases = [
+                {
+                    category: "交通 / 計程車 (往USJ必備)",
+                    items: [
+                        /* 修改：加入民宿精準地址卡片 */
+                        { tw: "請載我去民宿 (給司機看地址)。", jp: "この住所までお願いします：〒556-0003 大阪府大阪市浪速区恵美須西2-9-18", roma: "Osaka-shi Naniwa-ku Ebisunishi 2-9-18" },
+                        { tw: "請載我們去環球影城，請走高速公路。", jp: "ユニバーサル・スタジオ・ジャパンまで、高速道路を使ってお願いします。", roma: "USJ made, kousoku o tsukatte onegaishimasu." },
+                        { tw: "請載我去貓頭鷹咖啡(長堀橋)。", jp: "長堀橋の「フクロウカフェ chouette」までお願いします。", roma: "Nagahoribashi no Fukurou Cafe chouette made onegaishimasu." },
+                        { tw: "請問多少錢？", jp: "いくらですか？", roma: "Ikura desu ka?" }
+                    ]
+                },
+                {
+                    category: "住宿 / 飯店",
+                    items: [
+                        { tw: "我要辦理入住。", jp: "チェックインをお願いします。", roma: "Chekkuin o onegaishimasu." },
+                        { tw: "可以先寄放行李嗎？", jp: "荷物を預かってもらえますか？", roma: "Nimotsu o azukatte moraemasu ka?" },
+                        { tw: "請問 Wi-Fi 密碼是？", jp: "Wi-Fiのパスワードを教えてください。", roma: "Wi-Fi no pasuwaado o oshiete kudasai." }
+                    ]
+                },
+                {
+                    category: "餐廳進店 / 候位",
+                    items: [
+                        { tw: "請問現在有位子嗎？", jp: "いま席は空いていますか？", roma: "Ima seki wa aite imasu ka?" },
+                        { tw: "沒預約可排隊嗎？大約等多久？", jp: "予約していませんが、並べますか？待ち時間はどのくらいですか？", roma: "Yoyaku shite imasen ga, narabemasu ka? Machijikan wa donokurai desu ka?" },
+                        { tw: "我們有 3 位。", jp: "3人です。", roma: "Sannin desu." },
+                        { tw: "有中文菜單嗎？", jp: "中国語のメニューはありますか？", roma: "Chuugokugo no menyu wa arimasu ka?" }
+                    ]
+                },
+                {
+                    category: "點餐 / 結帳",
+                    items: [
+                        { tw: "我要點這個 (指菜單)。", jp: "これをお願いします。", roma: "Kore o onegaishimasu." },
+                        { tw: "請給我水。", jp: "お水をお願いします。", roma: "Omizu o onegaishimasu." },
+                        { tw: "我要結帳。", jp: "お会計をお願いします。", roma: "Okaikei o onegaishimasu." }
+                    ]
+                },
+                {
+                    category: "購物 / 退稅",
+                    items: [
+                        { tw: "可以免稅嗎？", jp: "免税できますか？", roma: "Menzei dekimasu ka?" },
+                        { tw: "請分開包裝。", jp: "別々に包んでください。", roma: "Betsubetsu ni tsutsunde kudasai." },
+                        { tw: "我有優惠券。", jp: "クーポンを持っています。", roma: "Kuupon o motte imasu." },
+                        { tw: "(USJ) 請將爆米花與桶子分開裝。", jp: "ポップコーンとバケツは別々にしてください。", roma: "Poppukoon to baketsu wa betsubetsu ni shite kudasai." }
+                    ]
+                }
+            ];
+
+            const shoppingList = [
+                {
+                    category: "藥妝急救 (Medicine)",
+                    color: "bg-blue-50 border-blue-200",
+                    items: [
+                        { name: "新露露金色 DX", jpName: "新ルルAゴールドDX", desc: "綜合感冒藥，糖衣錠好吞嚥，無苦味。" },
+                        { name: "龍角散顆粒/噴霧", jpName: "龍角散ダイレクト", desc: "喉嚨不適首選。夜用噴霧可針對夜咳。" },
+                        { name: "Roihi-Tsuboko 穴位貼布", jpName: "ロイヒつぼ膏", desc: "金色EX版(腰痛)、黑色版(重度痠痛)。" },
+                        { name: "太田胃散 S (升級版)", jpName: "太田胃散", desc: "添加消化酵素，制酸能力提升，分包裝方便。" },
+                        { name: "Minon 氨基酸系列", jpName: "ミノン アミノモイスト", desc: "保濕乳液與急救面膜，敏感肌換季救星。" },
+                        { name: "UHA 鐵+葉酸軟糖", jpName: "UHA グミサプリ 鉄＆葉酸", desc: "硬口感軟糖，女性生理期補給首選。" },
+                        { name: "KOWA Q&P 疲勞回復錠", jpName: "キューピーコーワゴールドα", desc: "消除疲勞神器，120錠裝適合囤貨。" }
+                    ]
+                },
+                {
+                    category: "3C 家電 (Electronics)",
+                    color: "bg-gray-50 border-gray-200",
+                    items: [
+                        { name: "Panasonic 掌上型刮鬍刀", jpName: "ラムダッシュ パームイン", desc: "Type-C 充電，外型如耳機盒時尚，全機水洗。" },
+                        { name: "Yaman 頭皮按摩器", jpName: "ヤーマン ヘッドスパ", desc: "高階款(紅外線+6爪)，深層抓揉頭皮肩頸。" },
+                        { name: "Ricoh GR IIIx/IV", jpName: "リコー GR III", desc: "街拍神器，熱門搶手貨。" },
+                        { name: "Fujifilm 電池", jpName: "富士フイルム バッテリー", desc: "價差巨大(約台幣780 vs 2400)，大容量必囤。" },
+                        { name: "MagSafe 磁吸支架", jpName: "MagSafe スタンド", desc: "強力吸附金屬面，錄影自拍神器。" }
+                    ]
+                },
+                {
+                    category: "穿搭與伴手禮 (Style & Gifts)",
+                    color: "bg-pink-50 border-pink-200",
+                    items: [
+                        { name: "GU/Uniqlo 隱藏好物", jpName: "ユニクロ / GU", desc: "Barrel Leg 酒桶褲、整件發熱褲、聯名領帶。" },
+                        { name: "Press Butter Sand", jpName: "プレスバターサンド", desc: "年節/季節限定口味必買。" },
+                        { name: "Nintendo/Pokemon", jpName: "任天堂 / ポケモン", desc: "皮克敏外套、吉伊卡哇聯名商品。" },
+                        { name: "明治頂級膠原蛋白粉", jpName: "アミノコラーゲン プレミアム", desc: "紅色版，添加 NMN 抗老因子。" }
+                    ]
+                }
+            ];
+
+            const filteredCoupons = coupons.filter(c => couponFilter === 'ALL' || c.locations.some(loc => loc.includes(couponFilter)));
+
+            return (
+                <div className="max-w-lg mx-auto min-h-screen bg-gray-50 pb-24 font-sans shadow-2xl relative">
+                {/* Header */}
+                <header className="bg-gradient-to-r from-red-600 to-orange-500 text-white p-5 sticky top-0 z-40 border-b-4 border-yellow-400 shadow-md">
+                    <div className="flex justify-between items-center">
+                    <div>
+                        <h1 className="text-2xl font-black italic tracking-tighter flex items-center gap-2">
+                        OSAKA 2026 <span className="text-yellow-300 text-sm bg-black/20 px-2 rounded">PRO</span>
+                        </h1>
+                        <p className="text-xs font-bold opacity-80 mt-1">資深導遊修訂版 v2.5</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <button onClick={() => setShowHotelModal(true)} className="p-2 bg-white/20 rounded-lg hover:bg-white/30"><Home size={20}/></button>
+                        <button onClick={() => setShowMapModal(true)} className="p-2 bg-white/20 rounded-lg hover:bg-white/30"><MapIcon size={20}/></button>
+                        <button onClick={() => setShowTransportModal(true)} className="p-2 bg-white/20 rounded-lg hover:bg-white/30"><Train size={20}/></button>
+                    </div>
+                    </div>
+                </header>
+
+                {/* Tabs */}
+                <div className="flex overflow-x-auto gap-2 p-3 sticky top-[84px] z-30 bg-gray-50/95 backdrop-blur-md border-b border-gray-200">
+                    {tabs.map((tab, idx) => (
+                    <button
+                        key={idx}
+                        onClick={() => setActiveTab(idx)}
+                        className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-black transition-all border-2 flex items-center gap-1
+                        ${activeTab === idx ? 'bg-red-600 text-white border-red-700 scale-105 shadow-md' : 'bg-white text-gray-500 border-gray-200'}`}
+                    >
+                        {tab.icon} {tab.short}
+                    </button>
+                    ))}
+                </div>
+
+                <main className="px-4 mt-2">
+                    {activeTab < 5 ? (
+                    // --- 行程顯示 ---
+                    <div className="bg-white rounded-3xl shadow-xl overflow-hidden border-2 border-gray-100 mb-8">
+                        <div className={`p-6 bg-gradient-to-br ${itinerary[activeTab].theme} text-white`}>
+                        <div className="flex justify-between items-start">
+                            <div>
+                            <h2 className="text-3xl font-black mb-1">{itinerary[activeTab].date}</h2>
+                            <p className="text-lg font-bold opacity-90">{itinerary[activeTab].title}</p>
+                            </div>
+                            <div className="text-[10px] bg-black/20 p-2 rounded-xl backdrop-blur-sm border border-white/20 max-w-[120px]">
+                            <Train size={12} className="inline mr-1"/> {itinerary[activeTab].transport}
+                            </div>
+                        </div>
+                        {itinerary[activeTab].alert && (
+                            <div className="mt-3 bg-white/20 p-2 rounded-lg text-xs font-bold flex items-start gap-1">
+                            <Info size={14} className="shrink-0 mt-0.5"/> {itinerary[activeTab].alert}
+                            </div>
+                        )}
+                        </div>
+                        
+                        <div className="p-4 space-y-6 relative">
+                        <div className="absolute left-8 top-10 bottom-10 w-0.5 bg-dashed bg-gray-200"></div>
+                        {itinerary[activeTab].spots.map((spot, idx) => {
+                            const isChecked = checkedItems[`${activeTab}-${idx}`];
+                            if (spot.isMeal) {
+                            return (
+                                <div key={idx} className="relative z-10 flex gap-4">
+                                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100 text-orange-600 border-2 border-orange-200 shrink-0 shadow-sm">
+                                    <Utensils size={18}/>
+                                </div>
+                                <div className="flex-1 bg-orange-50/50 p-4 rounded-2xl border-2 border-orange-100 shadow-sm">
+                                    <h4 className="font-black text-orange-800 flex items-center gap-2 mb-3 text-sm">{spot.title}</h4>
+                                    <div className="grid grid-cols-1 gap-3">
+                                    {spot.options.map((opt, oIdx) => (
+                                        <div key={oIdx} className="bg-white p-3 rounded-xl border border-orange-100 cursor-pointer active:scale-95 transition-transform" onClick={() => openGoogleMaps(opt.name)}>
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="font-black text-xs text-gray-800">{opt.name}</span>
+                                            <span className="text-[8px] font-black bg-orange-500 text-white px-1.5 py-0.5 rounded">{opt.tag}</span>
+                                        </div>
+                                        <p className="text-[10px] text-gray-500 leading-tight">{opt.desc}</p>
+                                        </div>
+                                    ))}
+                                    </div>
+                                </div>
+                                </div>
+                            );
+                            }
+                            return (
+                            <div key={idx} className="flex gap-4 relative z-10">
+                                <button onClick={() => toggleItem(activeTab, idx)} className={`w-10 h-10 rounded-full flex items-center justify-center border-2 shadow-sm shrink-0 transition-colors ${isChecked ? 'bg-green-500 border-green-600 text-white' : 'bg-white border-gray-200 text-gray-400'}`}>
+                                {isChecked ? <Check size={20}/> : spot.icon}
+                                </button>
+                                <div className={`flex-1 p-4 rounded-2xl border-2 transition-all cursor-pointer ${isChecked ? 'bg-gray-50 border-gray-100 opacity-60' : 'bg-white border-orange-50 shadow-sm'}`} onClick={() => openGoogleMaps(spot.mapQuery)}>
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[10px] font-black bg-gray-700 text-white px-2 py-0.5 rounded-md">{spot.time}</span>
+                                    <MapPin size={14} className="text-blue-500" />
+                                </div>
+                                <h3 className="font-black text-gray-800 leading-tight text-sm">{spot.title}</h3>
+                                <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">{spot.desc}</p>
+                                </div>
+                            </div>
+                            );
+                        })}
+                        </div>
+                    </div>
+                    ) : activeTab === 5 ? (
+                    // --- 優惠券 ---
+                    <div className="space-y-4 pb-20">
+                        <div className="bg-yellow-400 p-4 rounded-3xl text-red-900 font-black shadow-lg">
+                        <h2 className="text-xl flex items-center gap-2"><Receipt/> 優惠券篩選</h2>
+                        <div className="flex gap-2 mt-3 overflow-x-auto">
+                            {['ALL', '難波', '心齋橋', '梅田', '新世界'].map(loc => (
+                            <button key={loc} onClick={() => setCouponFilter(loc)} className={`shrink-0 px-4 py-1 rounded-full text-xs transition ${couponFilter === loc ? 'bg-red-600 text-white' : 'bg-white text-gray-600'}`}>{loc}</button>
+                            ))}
+                        </div>
+                        </div>
+                        {filteredCoupons.map(coupon => (
+                        <div key={coupon.id} className="bg-white p-3 rounded-2xl border-2 border-gray-100 shadow-sm flex gap-4">
+                            <div className="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center border border-gray-200 shrink-0 cursor-pointer" onClick={() => setShowCouponModal(coupon.img)}>
+                            {/* 修改：顯示預覽圖或圖示 */}
+                            <ImageIcon size={32} className="text-gray-300"/>
+                            </div>
+                            <div className="flex-1 flex flex-col justify-center">
+                            <div className="flex justify-between items-start">
+                                <h3 className="font-black text-gray-800 text-sm mb-1">{coupon.name}</h3>
+                                <span className="text-[10px] bg-gray-100 px-1 rounded text-gray-500">{coupon.type}</span>
+                            </div>
+                            <div className="text-red-600 font-black text-lg">{coupon.discount}</div>
+                            <div className="text-[10px] text-gray-400 mt-1 flex flex-wrap gap-1">
+                                {coupon.locations.map(l => <span key={l} className="bg-gray-50 px-1 rounded">{l}</span>)}
+                            </div>
+                            </div>
+                        </div>
+                        ))}
+                    </div>
+                    ) : activeTab === 6 ? (
+                    // --- 實用語 ---
+                    <div className="space-y-4 pb-20">
+                        {jpPhrases.map((cat, idx) => (
+                        <div key={idx} className="bg-white rounded-3xl border-2 border-indigo-50 overflow-hidden shadow-sm">
+                            <div className="bg-indigo-50 p-3 font-black text-indigo-700 text-sm flex items-center gap-2">
+                            <MessageSquare size={16}/> {cat.category}
+                            </div>
+                            <div className="divide-y divide-gray-100">
+                            {cat.items.map((item, i) => (
+                                <div key={i} className="p-4 hover:bg-gray-50 transition cursor-pointer" onClick={() => setShowTextModal(item.jp)}>
+                                <div className="text-sm font-bold text-gray-800 mb-1">{item.tw}</div>
+                                <div className="text-xs text-blue-600 font-medium mb-0.5">{item.jp}</div>
+                                <div className="text-[10px] text-gray-400 italic">{item.roma}</div>
+                                </div>
+                            ))}
+                            </div>
+                        </div>
+                        ))}
+                    </div>
+                    ) : activeTab === 7 ? (
+                    // --- 購物清單 ---
+                    <div className="space-y-4 pb-20">
+                        {shoppingList.map((cat, idx) => (
+                        <div key={idx} className={`rounded-3xl border-2 overflow-hidden shadow-sm ${cat.color} bg-white`}>
+                            <div className="p-3 font-black text-gray-700 text-sm flex items-center gap-2 border-b border-gray-100">
+                            <ShoppingCart size={16}/> {cat.category}
+                            </div>
+                            <div className="p-2 space-y-2">
+                            {cat.items.map((item, i) => (
+                                <div key={i} className="flex items-start gap-3 bg-white/60 p-2 rounded-xl">
+                                <input type="checkbox" className="mt-1 w-4 h-4 accent-red-500"/>
+                                <div>
+                                    <div className="text-sm font-bold text-gray-800">{item.name}</div>
+                                    {item.jpName && <div className="text-[10px] text-blue-600 font-bold bg-blue-50 inline-block px-1 rounded mb-1">{item.jpName}</div>}
+                                    <div className="text-xs text-gray-500">{item.desc}</div>
+                                </div>
+                                </div>
+                            ))}
+                            </div>
+                        </div>
+                        ))}
+                    </div>
+                    ) : activeTab === 8 ? (
+                    // --- 計算機 ---
+                    <div className="bg-white rounded-3xl shadow-2xl p-5 border-2 border-emerald-100 min-h-[600px] flex flex-col mb-10">
+                        <h2 className="text-xl font-black text-emerald-700 flex items-center gap-2 mb-4"><Calculator size={24}/> 購物計算機</h2>
+                        <div className="bg-gray-900 text-white p-5 rounded-2xl text-right mb-4 shadow-inner">
+                        <div className="text-4xl font-mono font-bold truncate">{calcDisplay}</div>
+                        </div>
+                        
+                        {/* 計算機鍵盤 */}
+                        <div className="grid grid-cols-4 gap-2 mb-4">
+                        <button onClick={clearCalc} className="p-4 bg-gray-200 rounded-xl font-bold text-red-600 active:bg-gray-300">AC</button>
+                        <button onClick={handleDelete} className="p-4 bg-gray-200 rounded-xl font-bold active:bg-gray-300"><X size={18} className="mx-auto"/></button>
+                        <button onClick={() => performOperation('÷')} className="p-4 bg-orange-100 text-orange-600 rounded-xl font-bold text-xl active:bg-orange-200">÷</button>
+                        <button onClick={() => performOperation('×')} className="p-4 bg-orange-100 text-orange-600 rounded-xl font-bold text-xl active:bg-orange-200">×</button>
+                        {[7,8,9].map(n => <button key={n} onClick={() => inputDigit(n)} className="p-4 bg-gray-50 rounded-xl font-bold text-xl active:bg-gray-200">{n}</button>)}
+                        <button onClick={() => performOperation('-')} className="p-4 bg-orange-100 text-orange-600 rounded-xl font-bold text-xl active:bg-orange-200">-</button>
+                        {[4,5,6].map(n => <button key={n} onClick={() => inputDigit(n)} className="p-4 bg-gray-50 rounded-xl font-bold text-xl active:bg-gray-200">{n}</button>)}
+                        <button onClick={() => performOperation('+')} className="p-4 bg-orange-100 text-orange-600 rounded-xl font-bold text-xl active:bg-orange-200">+</button>
+                        {[1,2,3].map(n => <button key={n} onClick={() => inputDigit(n)} className="p-4 bg-gray-50 rounded-xl font-bold text-xl active:bg-gray-200">{n}</button>)}
+                        <button onClick={() => performOperation('=')} className="p-4 bg-emerald-500 text-white rounded-xl font-bold text-xl shadow-lg row-span-2 active:bg-emerald-600 active:scale-95 transition">=</button>
+                        <button onClick={() => inputDigit(0)} className="col-span-2 p-4 bg-gray-50 rounded-xl font-bold text-xl active:bg-gray-200">0</button>
+                        <button onClick={inputDot} className="p-4 bg-gray-50 rounded-xl font-bold text-xl active:bg-gray-200">.</button>
+                        </div>
+
+                        <button onClick={addResultToCart} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-xl mb-4 active:scale-95 flex items-center justify-center gap-2 transition"><PlusCircle size={20}/> 加入清單</button>
+                        
+                        {/* 折扣按鈕群 */}
+                        <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+                        {[
+                            {id: 'none', label: '原價'},
+                            {id: 'taxfree', label: '免稅'},
+                            {id: 'drug', label: '藥妝 15%'},
+                            {id: 'elec', label: '電器 17%'},
+                            {id: 'dept', label: '百貨 5%'}
+                        ].map(type => (
+                            <button 
+                            key={type.id}
+                            onClick={() => setDiscountType(type.id)}
+                            className={`px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap border ${discountType === type.id ? 'bg-emerald-100 border-emerald-500 text-emerald-800' : 'bg-white border-gray-200 text-gray-500'}`}
+                            >
+                            {type.label}
+                            </button>
+                        ))}
+                        </div>
+
+                        {/* 清單顯示 */}
+                        <div className="flex-1 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden flex flex-col min-h-[150px]">
+                        <div className="p-3 text-[10px] font-black text-gray-400 border-b flex justify-between bg-white"><span>SHOPPING CART ({cartItems.length})</span><button onClick={() => setCartItems([])} className="text-red-400">CLEAR</button></div>
+                        <div className="flex-1 overflow-y-auto p-3 space-y-2" ref={scrollRef}>
+                            {cartItems.map((item, i) => (
+                            <div key={i} className="flex justify-between items-center bg-white p-2 rounded-xl shadow-sm border border-gray-100"><span className="font-mono font-bold text-emerald-700 text-sm">¥ {item.toLocaleString()}</span><button onClick={() => setCartItems(cartItems.filter((_, idx) => idx !== i))} className="text-gray-300 hover:text-red-500"><X size={16}/></button></div>
+                            ))}
+                        </div>
+                        </div>
+
+                        {/* 總結算 */}
+                        <div className={`mt-4 p-4 rounded-2xl border-2 transition-all ${discountInfo.color}`}>
+                        <div className="flex justify-between items-end">
+                            <div>
+                            <div className="text-[10px] font-black opacity-50 mb-1 uppercase">{discountInfo.label}</div>
+                            <div className="text-sm font-bold text-gray-600">¥ {discountInfo.finalJpy.toLocaleString()}</div>
+                            </div>
+                            <div className="text-right">
+                            {discountInfo.savedTwd > 0 && <div className="text-[10px] font-black text-red-500 mb-1">省下約 NT$ {discountInfo.savedTwd.toLocaleString()}</div>}
+                            <div className="text-2xl font-black text-gray-900 tracking-tighter"><span className="text-base">NT$</span> {discountInfo.finalTwd.toLocaleString()}</div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    ) : null}
+                </main>
+
+                {/* --- Modals --- */}
+                {/* 放大文字 Modal (給司機看) */}
+                {showTextModal && (
+                    <div className="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-6 cursor-pointer" onClick={() => setShowTextModal(null)}>
+                    <div className="text-center w-full px-4">
+                        <p className="text-white text-3xl md:text-5xl font-black leading-tight mb-8 whitespace-pre-wrap">{showTextModal}</p>
+                        <p className="text-gray-500 text-sm animate-pulse">(點擊任意處關閉)</p>
+                    </div>
+                    </div>
+                )}
+
+                {/* 優惠券 Barcode Modal (支援圖片) */}
+                {showCouponModal && (
+                    <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-6" onClick={() => setShowCouponModal(null)}>
+                    <div className="relative w-full max-w-sm">
+                        <div className="bg-white p-4 rounded-3xl text-center shadow-2xl">
+                            {/* 修改：顯示真實圖片 */}
+                            <img 
+                                src={showCouponModal} 
+                                alt="Coupon" 
+                                className="w-full h-auto rounded-lg mb-4 object-contain max-h-[70vh]"
+                                onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                }}
+                            />
+                            {/* 圖片載入失敗時顯示替代內容 */}
+                            <div className="hidden w-full aspect-square bg-gray-100 rounded-2xl flex-col items-center justify-center mb-4 text-gray-400">
+                                <ImageIcon size={48} className="mb-2"/>
+                                <span className="text-xs">圖片載入中或未上傳</span>
+                                <span className="text-[10px] mt-1 font-mono">{showCouponModal}</span>
+                            </div>
+                            
+                            <p className="font-black text-gray-800 text-base">結帳前請出示此畫面</p>
+                        </div>
+                        <button className="absolute -top-12 right-0 text-white"><X size={32}/></button>
+                    </div>
+                    </div>
+                )}
+
+                {/* 交通建議 Modal (整合舊版票券建議) */}
+                {showTransportModal && (
+                    <div className="fixed inset-0 bg-black/80 z-[100] p-6 flex items-center justify-center" onClick={() => setShowTransportModal(false)}>
+                    <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl overflow-y-auto max-h-[80vh]" onClick={e => e.stopPropagation()}>
+                        <h3 className="text-xl font-black mb-4 flex items-center gap-2 text-blue-600"><Train size={24}/> 交通攻略</h3>
+                        <div className="space-y-4 text-sm leading-relaxed text-gray-600">
+                            <div className="p-4 bg-green-50 rounded-2xl border border-green-100">
+                                <p className="font-bold text-green-800 mb-1 flex items-center gap-2"><Ticket size={16}/> Day 4 買什麼票？</p>
+                                <p>週六去大阪城與梅田，請購買<strong>「大阪地鐵一日券 (Enjoy Eco Card)」</strong>(假日版僅 ¥620，超划算！)。</p>
+                                <p className="text-red-500 text-xs mt-1 font-bold">⚠️ 不需買大阪周遊卡(¥3300)，因為晚上去梅田藍天大廈看夜景不免費，反而不划算。</p>
+                            </div>
+                            <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                                <p className="font-bold text-blue-800 mb-1">ICOCA (西瓜卡)</p>
+                                <p>Day 1 (機場)、Day 2 (奈良)、Day 3 (USJ)、Day 5 (機場) 全部直接刷 ICOCA 最方便！</p>
+                            </div>
+                            <div className="p-4 bg-red-50 rounded-2xl border border-red-100">
+                                <p className="font-bold text-red-800 mb-1 flex items-center gap-2"><Clock size={16}/> 行程提醒</p>
+                                <p>D1 抵達時間尷尬，建議在市區吃好料再 Check-in，不要直接衝奈良(時間不夠)。</p>
+                            </div>
+                        </div>
+                        <button onClick={() => setShowTransportModal(false)} className="w-full mt-6 py-4 bg-gray-900 text-white rounded-2xl font-black">完全理解！</button>
+                    </div>
+                    </div>
+                )}
+
+                {/* 住宿 Modal (整合舊版周邊導航) */}
+                {showHotelModal && (
+                    <div className="fixed inset-0 bg-black/80 z-[100] p-6 flex items-center justify-center" onClick={() => setShowHotelModal(false)}>
+                    <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <h3 className="text-xl font-black mb-4 flex items-center gap-2 text-indigo-600"><Home size={24}/> 住宿與周邊</h3>
+                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 mb-4">
+                            <h4 className="font-black text-lg">e-stay ebisu Osaka</h4>
+                            <p className="text-gray-500 text-sm mt-1">惠美須町站步行 2 分鐘</p>
+                            <hr className="my-3"/>
+                            <p className="text-xs text-gray-400">出門左轉就是通天閣，生活機能極佳。</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 gap-3">
+                            <button onClick={() => openGoogleMaps("e-stay ebisu Osaka")} className="py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                                <MapPin size={16}/> 導航回民宿
+                            </button>
+                            {/* 修改：更新顯示地址為完整日文地址 */}
+                            <button onClick={() => setShowTextModal("〒556-0003\n大阪府大阪市浪速区恵美須西2-9-18\ne-stay ebisu Osaka")} className="py-3 bg-indigo-50 text-indigo-700 rounded-xl font-bold text-sm">
+                                顯示地址 (給司機看)
+                            </button>
+                            <div className="grid grid-cols-2 gap-3 mt-2">
+                                <button onClick={() => openGoogleMaps("Super Tamade Ebisucho")} className="py-3 bg-yellow-400 text-yellow-900 rounded-xl font-bold text-sm flex flex-col items-center justify-center gap-1">
+                                    <ShoppingBag size={16}/> <span>玉出超市</span>
+                                    <span className="text-[10px] opacity-75">24H便宜</span>
+                                </button>
+                                <button onClick={() => openGoogleMaps("Osaka Kizu Wholesale Market")} className="py-3 bg-blue-500 text-white rounded-xl font-bold text-sm flex flex-col items-center justify-center gap-1">
+                                    <Fish size={16}/> <span>木津市場</span>
+                                    <span className="text-[10px] opacity-75">在地早市</span>
+                                </button>
+                            </div>
+                        </div>
+                        <button onClick={() => setShowHotelModal(false)} className="w-full mt-4 py-3 text-gray-400 font-bold text-sm">關閉</button>
+                    </div>
+                    </div>
+                )}
+
+                {/* 地圖連結 Modal (整合舊版地圖列表) */}
+                {showMapModal && (
+                    <div className="fixed inset-0 bg-black/80 z-[100] p-6 flex items-center justify-center" onClick={() => setShowMapModal(false)}>
+                    <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl relative">
+                        <h3 className="text-xl font-black mb-4 flex items-center gap-2 text-green-700"><MapIcon size={24}/> 交通路線圖</h3>
+                        
+                        <div className="space-y-3">
+                            {maps.map((map, idx) => (
+                                /* 修改：將 <a> 改為 <div> 以支援圖片彈窗與連結並存 */
+                                <div key={idx} className={`p-4 rounded-xl border-2 flex items-center justify-between ${map.color}`}>
+                                    {/* 左側：點擊開啟圖片彈窗 */}
+                                    <div 
+                                        className="flex items-center gap-3 flex-1 cursor-pointer" 
+                                        onClick={() => setShowCouponModal(map.img)}
+                                    >
+                                        <MapIcon size={20}/>
+                                        <span className="font-bold">{map.name}</span>
+                                        <div className="flex items-center text-[10px] bg-white/50 px-2 py-0.5 rounded-full ml-2">
+                                            <Eye size={10} className="mr-1"/> 查看圖片
+                                        </div>
+                                    </div>
+                                    
+                                    {/* 右側：點擊開啟外部連結 */}
+                                    <a href={map.link} target="_blank" className="p-2 -mr-2 text-current opacity-50 hover:opacity-100" title="開啟官方 PDF">
+                                        <ExternalLink size={20}/>
+                                    </a>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-6 p-3 bg-gray-50 rounded-xl text-xs text-gray-500 border border-gray-200">
+                            <Info size={14} className="inline mr-1 mb-0.5"/>
+                            點擊左側文字可直接查看已下載的圖片，點擊右側箭頭可開啟官方 PDF。
+                        </div>
+
+                        <button onClick={() => setShowMapModal(false)} className="bg-gray-100 px-6 py-3 rounded-xl font-bold w-full mt-4 text-gray-500">關閉</button>
+                    </div>
+                    </div>
+                )}
+                </div>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
