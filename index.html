@@ -2,23 +2,24 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <!-- 1. 優化視窗設定：禁止縮放、適配瀏海螢幕 (viewport-fit=cover) -->
+    <!-- 1. 優化視窗設定：禁止縮放、適配瀏海螢幕 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- 2. iOS Safari 專用設定：全螢幕模式 -->
+    <!-- 2. PWA 關鍵設定：連結 manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#f97316">
+
+    <!-- iOS 專用設定 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="大阪旅遊">
     
-    <!-- Android Chrome 專用設定 -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#f97316"> <!-- 設定狀態列顏色 (橘色) -->
-
     <title>大阪旅遊攻略 2026</title>
     
-    <!-- 3. 設定 App 圖示 (使用章魚 Emoji 當作臨時圖示) -->
+    <!-- App 圖示 (iOS & 瀏覽器分頁用) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐙</text></svg>">
-    <link rel="apple-touch-icon" href="icon.png"> <!-- 如果您有 icon.png，請放在同一資料夾，iPhone 會優先使用 -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐙</text></svg>">
     
     <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -52,21 +53,19 @@
         
         body {
             background-color: #fff7ed;
-            /* 讓 App 內容避開 iPhone 底部橫條與上方瀏海 */
             padding-bottom: env(safe-area-inset-bottom); 
-            /* 禁止長按選取文字 (讓感覺更像 App)，除了輸入框和特定文字區 */
+            /* 禁止選取與長按，讓體驗像 App */
             -webkit-user-select: none;
             user-select: none;
-            -webkit-tap-highlight-color: transparent; /* 移除點擊時的灰色背景 */
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
-        /* 允許特定區域選取文字 (如日語手指通、地址) */
         .select-text {
             -webkit-user-select: text;
             user-select: text;
         }
 
-        /* 讓 Header 避開狀態列 */
         header {
             padding-top: env(safe-area-inset-top);
         }
@@ -75,7 +74,7 @@
 <body>
     <div id="root"></div>
 
-    <!-- 這裡開始是我們的主要程式碼 -->
+    <!-- React 程式碼開始 -->
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
@@ -205,7 +204,7 @@
 
             const getDiscountInfo = () => {
                 const basePrice = cartItems.reduce((acc, curr) => acc + curr, 0);
-                const taxFreePrice = Math.round(basePrice / 1.1); // 假設輸入的是含稅價，反推未稅
+                const taxFreePrice = Math.round(basePrice / 1.1);
                 let rate = 0; let label = "目前價格 (含稅)"; let color = "bg-white border-gray-200";
                 
                 switch(discountType) {
@@ -259,7 +258,6 @@
                     { time: "15:00", title: "民宿 Check-in", desc: "吃飽剛好進房放行李、稍微整理儀容。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" },
                     { time: "16:00", title: "通天閣 & 新世界散策", desc: "沒有行李一身輕，逛逛復古街道。", icon: <Camera/>, mapQuery: "Tsutenkaku" },
                     { time: "17:30", title: "阿倍野 HARUKAS 300", desc: "步行或地鐵一站至天王寺，欣賞絕美日落與夜景。", icon: <Moon/>, mapQuery: "Harukas 300" },
-                    /* 修改：18:30 晚餐，燒肉萬野 (替代已閉店的燒肉平和) */
                     { 
                     time: "18:30", title: "【晚餐建議】天王寺必吃", 
                     isMeal: true,
@@ -268,8 +266,7 @@
                         { name: "千房大阪燒", desc: "阿倍野 Q's Mall 店，經典大阪味。", tag: "經典必吃" }
                     ]
                     },
-                    /* 修改：20:00 逛 Bic Camera，注意21:00關門 */
-                    { time: "20:00", title: "Bic Camera 阿倍野店", desc: "就在隔壁 Q's Mall 裡面！吃飽搬貨剛好，記得只營業到 21:00 喔！", icon: <ShoppingBag/>, mapQuery: "Bic Camera Abeno Q's Mall Store" },
+                    { time: "20:00", title: "Bic Camera 阿倍野店", desc: "吃飽喝足後去隔壁 Q's Mall 搬貨！記得 21:00 關門喔！", icon: <ShoppingBag/>, mapQuery: "Bic Camera Abeno Q's Mall Store" },
                     { time: "21:30", title: "唐吉訶德 新世界店", desc: "就在通天閣旁，買完直接扛回民宿，超方便。", icon: <ShoppingBag/>, mapQuery: "MEGA Don Quijote Shinsekai" },
                     { time: "23:00", title: "返回民宿休息", desc: "唐吉訶德過個馬路就到家，整理戰利品準備睡覺。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" }
                 ]
@@ -296,7 +293,6 @@
                     { time: "15:30", title: "搭車前往貓頭鷹咖啡", desc: "直接搭計程車(約10分，車資¥1200左右)，多人分擔很划算。", icon: <Bird/>, mapQuery: "Happy Owl Cafe chouette Osaka" },
                     { time: "16:00", title: "Happy Owl Cafe chouette", desc: "【預約1hr】享受完整的療癒時光，零距離互動。", icon: <Star/>, mapQuery: "Happy Owl Cafe chouette Osaka" },
                     { time: "17:30", title: "心齋橋 & 道頓堀", desc: "從咖啡廳一路往南逛，終點是跑跑人看板。", icon: <ShoppingBag/>, mapQuery: "Dotonbori Glico Sign" },
-                    /* 修改：18:00 晚餐 */
                     { 
                     time: "18:00", title: "【晚餐建議】燒肉之夜", 
                     isMeal: true,
@@ -305,8 +301,7 @@
                         { name: "國產牛燒肉 Aburiya", desc: "需提前預約，肉質佳。", tag: "高評價" }
                     ]
                     },
-                    /* 修改：20:00 逛 Bic Camera，注意21:00關門 */
-                    { time: "20:00", title: "Bic Camera 難波店", desc: "吃飽後散步去逛電器！就在千日前通，注意 21:00 關門。", icon: <ShoppingBag/>, mapQuery: "Bic Camera Namba Store" },
+                    { time: "20:00", title: "Bic Camera 難波店", desc: "吃飽散步去逛電器！就在千日前通，注意 21:00 關門。", icon: <ShoppingBag/>, mapQuery: "Bic Camera Namba Store" },
                     { time: "22:00", title: "返回民宿休息", desc: "吃飽從難波站搭地鐵(日本橋→惠美須町)或計程車回民宿，養精蓄銳。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" }
                 ]
                 },
@@ -394,7 +389,6 @@
                 { id: 6, name: "YAMADA 電機", discount: "10% + 7%", type: "電器", locations: ["難波"], img: "yamada.jpg" }
             ];
 
-            // 新增：地圖資料 (整合舊版功能) - 加上圖片檔案連結
             const maps = [
                 { name: "JR 西日本路線圖", link: "https://www.westjr.co.jp/global/tc/timetable/pdf/map_kansai.pdf", img: "map_jr.jpg", color: "bg-blue-50 border-blue-200 text-blue-800" },
                 { name: "大阪地鐵路線圖", link: "https://subway.osakametro.co.jp/en/guide/routemap.php", img: "map_metro.jpg", color: "bg-red-50 border-red-200 text-red-800" },
@@ -405,7 +399,6 @@
                 {
                     category: "交通 / 計程車 (往USJ必備)",
                     items: [
-                        /* 修改：加入民宿精準地址卡片 */
                         { tw: "請載我去民宿 (給司機看地址)。", jp: "この住所までお願いします：〒556-0003 大阪府大阪市浪速区恵美須西2-9-18", roma: "Osaka-shi Naniwa-ku Ebisunishi 2-9-18" },
                         { tw: "請載我們去環球影城，請走高速公路。", jp: "ユニバーサル・スタジオ・ジャパンまで、高速道路を使ってお願いします。", roma: "USJ made, kousoku o tsukatte onegaishimasu." },
                         { tw: "請載我去貓頭鷹咖啡(長堀橋)。", jp: "長堀橋の「フクロウカフェ chouette」までお願いします。", roma: "Nagahoribashi no Fukurou Cafe chouette made onegaishimasu." },
