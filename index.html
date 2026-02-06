@@ -2,10 +2,10 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <!-- 1. 優化視窗設定：禁止縮放、適配瀏海螢幕 -->
+    <!-- 1. 優化視窗設定 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- 2. PWA 關鍵設定：連結 manifest -->
+    <!-- 2. PWA 關鍵設定 -->
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#f97316">
@@ -58,8 +58,10 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
-            /* 全局字體稍微放大 */
-            font-size: 16px; 
+            
+            /* --- 關鍵修改：全站基礎字體加大至 19px (原16px) --- */
+            font-size: 19px; 
+            line-height: 1.6; /* 增加行距，閱讀更不費力 */
         }
 
         .select-text {
@@ -226,15 +228,15 @@
             const discountInfo = getDiscountInfo();
 
             const tabs = [
-                { name: "Day 1", short: "D1", icon: <Plane size={20}/> },
-                { name: "Day 2", short: "D2", icon: <Bird size={20}/> },
-                { name: "Day 3", short: "D3", icon: <Star size={20}/> },
-                { name: "Day 4", short: "D4", icon: <Camera size={20}/> },
-                { name: "Day 5", short: "D5", icon: <Luggage size={20}/> },
-                { name: "優惠券", short: "折價", icon: <Receipt size={20}/> },
-                { name: "日語", short: "手指通", icon: <MessageSquare size={20}/> },
-                { name: "購物", short: "清單", icon: <ShoppingCart size={20}/> },
-                { name: "計算機", short: "匯率", icon: <Calculator size={20}/> }
+                { name: "Day 1", short: "D1", icon: <Plane size={24}/> },
+                { name: "Day 2", short: "D2", icon: <Bird size={24}/> },
+                { name: "Day 3", short: "D3", icon: <Star size={24}/> },
+                { name: "Day 4", short: "D4", icon: <Camera size={24}/> },
+                { name: "Day 5", short: "D5", icon: <Luggage size={24}/> },
+                { name: "優惠券", short: "折價", icon: <Receipt size={24}/> },
+                { name: "日語", short: "手指通", icon: <MessageSquare size={24}/> },
+                { name: "購物", short: "清單", icon: <ShoppingCart size={24}/> },
+                { name: "計算機", short: "匯率", icon: <Calculator size={24}/> }
             ];
 
             const itinerary = [
@@ -495,12 +497,12 @@
                         <h1 className="text-3xl font-black italic tracking-tighter flex items-center gap-2">
                         OSAKA 2026 <span className="text-yellow-300 text-base bg-black/20 px-2 rounded">PRO</span>
                         </h1>
-                        <p className="text-sm font-bold opacity-80 mt-1">資深導遊修訂版 v3.0 (長輩模式)</p>
+                        <p className="text-sm font-bold opacity-80 mt-1">資深導遊修訂版 v4.0 (樂齡特大字)</p>
                     </div>
                     <div className="flex gap-2">
-                        <button onClick={() => setShowHotelModal(true)} className="p-3 bg-white/20 rounded-lg hover:bg-white/30"><Home size={24}/></button>
-                        <button onClick={() => setShowMapModal(true)} className="p-3 bg-white/20 rounded-lg hover:bg-white/30"><MapIcon size={24}/></button>
-                        <button onClick={() => setShowTransportModal(true)} className="p-3 bg-white/20 rounded-lg hover:bg-white/30"><Train size={24}/></button>
+                        <button onClick={() => setShowHotelModal(true)} className="p-3 bg-white/20 rounded-lg hover:bg-white/30"><Home size={28}/></button>
+                        <button onClick={() => setShowMapModal(true)} className="p-3 bg-white/20 rounded-lg hover:bg-white/30"><MapIcon size={28}/></button>
+                        <button onClick={() => setShowTransportModal(true)} className="p-3 bg-white/20 rounded-lg hover:bg-white/30"><Train size={28}/></button>
                     </div>
                     </div>
                 </header>
@@ -511,7 +513,7 @@
                     <button
                         key={idx}
                         onClick={() => setActiveTab(idx)}
-                        className={`flex-shrink-0 px-5 py-3 rounded-full text-base font-black transition-all border-2 flex items-center gap-2
+                        className={`flex-shrink-0 px-6 py-4 rounded-full text-lg font-black transition-all border-2 flex items-center gap-2
                         ${activeTab === idx ? 'bg-red-600 text-white border-red-700 scale-105 shadow-md' : 'bg-white text-gray-500 border-gray-200'}`}
                     >
                         {tab.icon} {tab.short}
@@ -529,37 +531,37 @@
                             <h2 className="text-4xl font-black mb-2">{itinerary[activeTab].date}</h2>
                             <p className="text-xl font-bold opacity-90">{itinerary[activeTab].title}</p>
                             </div>
-                            <div className="text-sm bg-black/20 p-3 rounded-xl backdrop-blur-sm border border-white/20 max-w-[150px]">
-                            <Train size={16} className="inline mr-1"/> {itinerary[activeTab].transport}
+                            <div className="text-base bg-black/20 p-3 rounded-xl backdrop-blur-sm border border-white/20 max-w-[180px]">
+                            <Train size={20} className="inline mr-1"/> {itinerary[activeTab].transport}
                             </div>
                         </div>
                         {itinerary[activeTab].alert && (
-                            <div className="mt-4 bg-white/20 p-3 rounded-xl text-base font-bold flex items-start gap-2">
-                            <Info size={20} className="shrink-0 mt-0.5"/> {itinerary[activeTab].alert}
+                            <div className="mt-4 bg-white/20 p-3 rounded-xl text-lg font-bold flex items-start gap-2">
+                            <Info size={24} className="shrink-0 mt-1"/> {itinerary[activeTab].alert}
                             </div>
                         )}
                         </div>
                         
-                        <div className="p-5 space-y-8 relative">
+                        <div className="p-5 space-y-10 relative">
                         <div className="absolute left-9 top-10 bottom-10 w-1 bg-dashed bg-gray-200"></div>
                         {itinerary[activeTab].spots.map((spot, idx) => {
                             const isChecked = checkedItems[`${activeTab}-${idx}`];
                             if (spot.isMeal) {
                             return (
                                 <div key={idx} className="relative z-10 flex gap-5">
-                                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-orange-100 text-orange-600 border-2 border-orange-200 shrink-0 shadow-sm">
-                                    <Utensils size={24}/>
+                                <div className="w-14 h-14 rounded-full flex items-center justify-center bg-orange-100 text-orange-600 border-2 border-orange-200 shrink-0 shadow-sm">
+                                    <Utensils size={28}/>
                                 </div>
-                                <div className="flex-1 bg-orange-50/50 p-5 rounded-3xl border-2 border-orange-100 shadow-sm">
-                                    <h4 className="font-black text-orange-800 flex items-center gap-2 mb-4 text-xl">{spot.title}</h4>
-                                    <div className="grid grid-cols-1 gap-4">
+                                <div className="flex-1 bg-orange-50/50 p-6 rounded-3xl border-2 border-orange-100 shadow-sm">
+                                    <h4 className="font-black text-orange-800 flex flex-wrap items-center gap-2 mb-4 text-2xl">{spot.title}</h4>
+                                    <div className="grid grid-cols-1 gap-6">
                                     {spot.options.map((opt, oIdx) => (
-                                        <div key={oIdx} className="bg-white p-4 rounded-2xl border border-orange-100 cursor-pointer active:scale-95 transition-transform" onClick={() => openGoogleMaps(opt.name)}>
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="font-black text-lg text-gray-800">{opt.name}</span>
-                                            <span className="text-xs font-black bg-orange-500 text-white px-2 py-1 rounded">{opt.tag}</span>
+                                        <div key={oIdx} className="bg-white p-5 rounded-2xl border border-orange-100 cursor-pointer active:scale-95 transition-transform" onClick={() => openGoogleMaps(opt.name)}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="font-black text-xl text-gray-800">{opt.name}</span>
+                                            <span className="text-sm font-black bg-orange-500 text-white px-3 py-1 rounded shrink-0">{opt.tag}</span>
                                         </div>
-                                        <p className="text-base text-gray-600 leading-relaxed">{opt.desc}</p>
+                                        <p className="text-lg text-gray-600 leading-relaxed">{opt.desc}</p>
                                         </div>
                                     ))}
                                     </div>
@@ -569,16 +571,16 @@
                             }
                             return (
                             <div key={idx} className="flex gap-5 relative z-10">
-                                <button onClick={() => toggleItem(activeTab, idx)} className={`w-12 h-12 rounded-full flex items-center justify-center border-2 shadow-sm shrink-0 transition-colors ${isChecked ? 'bg-green-500 border-green-600 text-white' : 'bg-white border-gray-200 text-gray-400'}`}>
-                                {isChecked ? <Check size={24}/> : spot.icon}
+                                <button onClick={() => toggleItem(activeTab, idx)} className={`w-14 h-14 rounded-full flex items-center justify-center border-2 shadow-sm shrink-0 transition-colors ${isChecked ? 'bg-green-500 border-green-600 text-white' : 'bg-white border-gray-200 text-gray-400'}`}>
+                                {isChecked ? <Check size={28}/> : spot.icon}
                                 </button>
-                                <div className={`flex-1 p-5 rounded-3xl border-2 transition-all cursor-pointer ${isChecked ? 'bg-gray-50 border-gray-100 opacity-60' : 'bg-white border-orange-50 shadow-sm'}`} onClick={() => openGoogleMaps(spot.mapQuery)}>
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm font-black bg-gray-700 text-white px-3 py-1 rounded-lg">{spot.time}</span>
-                                    <MapPin size={20} className="text-blue-500" />
+                                <div className={`flex-1 p-6 rounded-3xl border-2 transition-all cursor-pointer ${isChecked ? 'bg-gray-50 border-gray-100 opacity-60' : 'bg-white border-orange-50 shadow-sm'}`} onClick={() => openGoogleMaps(spot.mapQuery)}>
+                                <div className="flex justify-between items-center mb-3">
+                                    <span className="text-lg font-black bg-gray-700 text-white px-4 py-1.5 rounded-xl">{spot.time}</span>
+                                    <MapPin size={24} className="text-blue-500" />
                                 </div>
-                                <h3 className="font-black text-gray-800 leading-tight text-xl mb-2">{spot.title}</h3>
-                                <p className="text-base text-gray-600 leading-relaxed">{spot.desc}</p>
+                                <h3 className="font-black text-gray-800 leading-tight text-2xl mb-3">{spot.title}</h3>
+                                <p className="text-lg text-gray-600 leading-relaxed">{spot.desc}</p>
                                 </div>
                             </div>
                             );
@@ -587,27 +589,27 @@
                     </div>
                     ) : activeTab === 5 ? (
                     // --- 優惠券 ---
-                    <div className="space-y-6 pb-20">
-                        <div className="bg-yellow-400 p-5 rounded-3xl text-red-900 font-black shadow-lg">
-                        <h2 className="text-2xl flex items-center gap-3"><Receipt size={28}/> 優惠券篩選</h2>
-                        <div className="flex gap-3 mt-4 overflow-x-auto">
+                    <div className="space-y-8 pb-24">
+                        <div className="bg-yellow-400 p-6 rounded-3xl text-red-900 font-black shadow-lg">
+                        <h2 className="text-3xl flex items-center gap-3"><Receipt size={32}/> 優惠券篩選</h2>
+                        <div className="flex gap-3 mt-5 overflow-x-auto">
                             {['ALL', '難波', '心齋橋', '梅田', '新世界'].map(loc => (
-                            <button key={loc} onClick={() => setCouponFilter(loc)} className={`shrink-0 px-6 py-2 rounded-full text-base transition ${couponFilter === loc ? 'bg-red-600 text-white' : 'bg-white text-gray-600'}`}>{loc}</button>
+                            <button key={loc} onClick={() => setCouponFilter(loc)} className={`shrink-0 px-6 py-3 rounded-full text-lg transition ${couponFilter === loc ? 'bg-red-600 text-white' : 'bg-white text-gray-600'}`}>{loc}</button>
                             ))}
                         </div>
                         </div>
                         {filteredCoupons.map(coupon => (
-                        <div key={coupon.id} className="bg-white p-4 rounded-3xl border-2 border-gray-100 shadow-sm flex gap-5 cursor-pointer" onClick={() => setShowCouponModal(coupon.img)}>
-                            <div className="w-28 h-28 bg-gray-100 rounded-2xl flex items-center justify-center border border-gray-200 shrink-0">
-                                <ImageIcon size={40} className="text-gray-300"/>
+                        <div key={coupon.id} className="bg-white p-5 rounded-3xl border-2 border-gray-100 shadow-sm flex gap-5 cursor-pointer" onClick={() => setShowCouponModal(coupon.img)}>
+                            <div className="w-32 h-32 bg-gray-100 rounded-2xl flex items-center justify-center border border-gray-200 shrink-0">
+                                <ImageIcon size={48} className="text-gray-300"/>
                             </div>
                             <div className="flex-1 flex flex-col justify-center">
                             <div className="flex justify-between items-start">
-                                <h3 className="font-black text-gray-800 text-lg mb-2">{coupon.name}</h3>
-                                <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-500">{coupon.type}</span>
+                                <h3 className="font-black text-gray-800 text-xl mb-2">{coupon.name}</h3>
+                                <span className="text-sm bg-gray-100 px-3 py-1 rounded text-gray-500 shrink-0">{coupon.type}</span>
                             </div>
-                            <div className="text-red-600 font-black text-2xl mb-2">{coupon.discount}</div>
-                            <div className="text-xs text-gray-400 flex flex-wrap gap-2">
+                            <div className="text-red-600 font-black text-3xl mb-3">{coupon.discount}</div>
+                            <div className="text-sm text-gray-400 flex flex-wrap gap-2">
                                 {coupon.locations.map(l => <span key={l} className="bg-gray-50 px-2 py-1 rounded">{l}</span>)}
                             </div>
                             </div>
@@ -616,18 +618,18 @@
                     </div>
                     ) : activeTab === 6 ? (
                     // --- 實用語 ---
-                    <div className="space-y-6 pb-20">
+                    <div className="space-y-8 pb-24">
                         {jpPhrases.map((cat, idx) => (
                         <div key={idx} className="bg-white rounded-3xl border-2 border-indigo-50 overflow-hidden shadow-sm">
-                            <div className="bg-indigo-50 p-4 font-black text-indigo-700 text-lg flex items-center gap-2">
-                            <MessageSquare size={24}/> {cat.category}
+                            <div className="bg-indigo-50 p-5 font-black text-indigo-700 text-xl flex items-center gap-3">
+                            <MessageSquare size={28}/> {cat.category}
                             </div>
                             <div className="divide-y divide-gray-100">
                             {cat.items.map((item, i) => (
-                                <div key={i} className="p-5 hover:bg-gray-50 transition cursor-pointer" onClick={() => setShowTextModal(item.jp)}>
-                                <div className="text-lg font-bold text-gray-800 mb-2">{item.tw}</div>
-                                <div className="text-base text-blue-600 font-medium mb-1">{item.jp}</div>
-                                <div className="text-xs text-gray-400 italic">{item.roma}</div>
+                                <div key={i} className="p-6 hover:bg-gray-50 transition cursor-pointer" onClick={() => setShowTextModal(item.jp)}>
+                                <div className="text-xl font-bold text-gray-800 mb-3">{item.tw}</div>
+                                <div className="text-lg text-blue-600 font-medium mb-1">{item.jp}</div>
+                                <div className="text-sm text-gray-400 italic">{item.roma}</div>
                                 </div>
                             ))}
                             </div>
@@ -636,20 +638,20 @@
                     </div>
                     ) : activeTab === 7 ? (
                     // --- 購物清單 ---
-                    <div className="space-y-6 pb-20">
+                    <div className="space-y-8 pb-24">
                         {shoppingList.map((cat, idx) => (
                         <div key={idx} className={`rounded-3xl border-2 overflow-hidden shadow-sm ${cat.color} bg-white`}>
-                            <div className="p-4 font-black text-gray-700 text-lg flex items-center gap-2 border-b border-gray-100">
-                            <ShoppingCart size={24}/> {cat.category}
+                            <div className="p-5 font-black text-gray-700 text-xl flex items-center gap-3 border-b border-gray-100">
+                            <ShoppingCart size={28}/> {cat.category}
                             </div>
-                            <div className="p-4 space-y-4">
+                            <div className="p-5 space-y-5">
                             {cat.items.map((item, i) => (
-                                <div key={i} className="flex items-start gap-4 bg-white/60 p-3 rounded-2xl">
-                                <input type="checkbox" className="mt-1.5 w-6 h-6 accent-red-500 shrink-0"/>
+                                <div key={i} className="flex items-start gap-4 bg-white/60 p-4 rounded-2xl">
+                                <input type="checkbox" className="mt-1.5 w-8 h-8 accent-red-500 shrink-0"/>
                                 <div>
-                                    <div className="text-lg font-bold text-gray-800">{item.name}</div>
-                                    {item.jpName && <div className="text-xs text-blue-600 font-bold bg-blue-50 inline-block px-2 py-1 rounded mb-2 mt-1">{item.jpName}</div>}
-                                    <div className="text-sm text-gray-500">{item.desc}</div>
+                                    <div className="text-xl font-bold text-gray-800">{item.name}</div>
+                                    {item.jpName && <div className="text-sm text-blue-600 font-bold bg-blue-50 inline-block px-3 py-1 rounded mb-2 mt-1">{item.jpName}</div>}
+                                    <div className="text-base text-gray-500">{item.desc}</div>
                                 </div>
                                 </div>
                             ))}
@@ -660,15 +662,15 @@
                     ) : activeTab === 8 ? (
                     // --- 計算機 ---
                     <div className="bg-white rounded-3xl shadow-2xl p-6 border-2 border-emerald-100 min-h-[600px] flex flex-col mb-10">
-                        <h2 className="text-2xl font-black text-emerald-700 flex items-center gap-2 mb-4"><Calculator size={28}/> 購物計算機</h2>
+                        <h2 className="text-2xl font-black text-emerald-700 flex items-center gap-3 mb-4"><Calculator size={32}/> 購物計算機</h2>
                         <div className="bg-gray-900 text-white p-6 rounded-3xl text-right mb-6 shadow-inner">
-                        <div className="text-5xl font-mono font-bold truncate">{calcDisplay}</div>
+                        <div className="text-6xl font-mono font-bold truncate">{calcDisplay}</div>
                         </div>
                         
                         {/* 計算機鍵盤: 按鈕加大 */}
                         <div className="grid grid-cols-4 gap-3 mb-6">
                         <button onClick={clearCalc} className="p-5 bg-gray-200 rounded-2xl font-bold text-red-600 active:bg-gray-300 text-2xl">AC</button>
-                        <button onClick={handleDelete} className="p-5 bg-gray-200 rounded-2xl font-bold active:bg-gray-300"><X size={24} className="mx-auto"/></button>
+                        <button onClick={handleDelete} className="p-5 bg-gray-200 rounded-2xl font-bold active:bg-gray-300"><X size={28} className="mx-auto"/></button>
                         <button onClick={() => performOperation('÷')} className="p-5 bg-orange-100 text-orange-600 rounded-2xl font-bold text-2xl active:bg-orange-200">÷</button>
                         <button onClick={() => performOperation('×')} className="p-5 bg-orange-100 text-orange-600 rounded-2xl font-bold text-2xl active:bg-orange-200">×</button>
                         {[7,8,9].map(n => <button key={n} onClick={() => inputDigit(n)} className="p-5 bg-gray-50 rounded-2xl font-bold text-2xl active:bg-gray-200">{n}</button>)}
@@ -681,7 +683,7 @@
                         <button onClick={inputDot} className="p-5 bg-gray-50 rounded-2xl font-bold text-2xl active:bg-gray-200">.</button>
                         </div>
 
-                        <button onClick={addResultToCart} className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black shadow-xl mb-6 active:scale-95 flex items-center justify-center gap-2 transition text-lg"><PlusCircle size={24}/> 加入清單</button>
+                        <button onClick={addResultToCart} className="w-full py-6 bg-emerald-600 text-white rounded-2xl font-black shadow-xl mb-6 active:scale-95 flex items-center justify-center gap-3 transition text-xl"><PlusCircle size={28}/> 加入清單</button>
                         
                         {/* 折扣按鈕群 */}
                         <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
@@ -695,7 +697,7 @@
                             <button 
                             key={type.id}
                             onClick={() => setDiscountType(type.id)}
-                            className={`px-5 py-3 rounded-xl text-sm font-bold whitespace-nowrap border-2 ${discountType === type.id ? 'bg-emerald-100 border-emerald-500 text-emerald-800' : 'bg-white border-gray-200 text-gray-500'}`}
+                            className={`px-6 py-4 rounded-xl text-base font-bold whitespace-nowrap border-2 ${discountType === type.id ? 'bg-emerald-100 border-emerald-500 text-emerald-800' : 'bg-white border-gray-200 text-gray-500'}`}
                             >
                             {type.label}
                             </button>
@@ -704,10 +706,10 @@
 
                         {/* 清單顯示 */}
                         <div className="flex-1 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden flex flex-col min-h-[150px]">
-                        <div className="p-4 text-xs font-black text-gray-400 border-b flex justify-between bg-white"><span>SHOPPING CART ({cartItems.length})</span><button onClick={() => setCartItems([])} className="text-red-400">CLEAR</button></div>
+                        <div className="p-4 text-sm font-black text-gray-400 border-b flex justify-between bg-white"><span>SHOPPING CART ({cartItems.length})</span><button onClick={() => setCartItems([])} className="text-red-400">CLEAR</button></div>
                         <div className="flex-1 overflow-y-auto p-4 space-y-3" ref={scrollRef}>
                             {cartItems.map((item, i) => (
-                            <div key={i} className="flex justify-between items-center bg-white p-3 rounded-2xl shadow-sm border border-gray-100"><span className="font-mono font-bold text-emerald-700 text-lg">¥ {item.toLocaleString()}</span><button onClick={() => setCartItems(cartItems.filter((_, idx) => idx !== i))} className="text-gray-300 hover:text-red-500"><X size={20}/></button></div>
+                            <div key={i} className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100"><span className="font-mono font-bold text-emerald-700 text-xl">¥ {item.toLocaleString()}</span><button onClick={() => setCartItems(cartItems.filter((_, idx) => idx !== i))} className="text-gray-300 hover:text-red-500"><X size={24}/></button></div>
                             ))}
                         </div>
                         </div>
@@ -716,12 +718,12 @@
                         <div className={`mt-6 p-6 rounded-2xl border-2 transition-all ${discountInfo.color}`}>
                         <div className="flex justify-between items-end">
                             <div>
-                            <div className="text-xs font-black opacity-50 mb-1 uppercase">{discountInfo.label}</div>
-                            <div className="text-lg font-bold text-gray-600">¥ {discountInfo.finalJpy.toLocaleString()}</div>
+                            <div className="text-sm font-black opacity-50 mb-1 uppercase">{discountInfo.label}</div>
+                            <div className="text-xl font-bold text-gray-600">¥ {discountInfo.finalJpy.toLocaleString()}</div>
                             </div>
                             <div className="text-right">
-                            {discountInfo.savedTwd > 0 && <div className="text-sm font-black text-red-500 mb-1">省下約 NT$ {discountInfo.savedTwd.toLocaleString()}</div>}
-                            <div className="text-4xl font-black text-gray-900 tracking-tighter"><span className="text-xl">NT$</span> {discountInfo.finalTwd.toLocaleString()}</div>
+                            {discountInfo.savedTwd > 0 && <div className="text-base font-black text-red-500 mb-1">省下約 NT$ {discountInfo.savedTwd.toLocaleString()}</div>}
+                            <div className="text-5xl font-black text-gray-900 tracking-tighter"><span className="text-2xl">NT$</span> {discountInfo.finalTwd.toLocaleString()}</div>
                             </div>
                         </div>
                         </div>
@@ -734,8 +736,8 @@
                 {showTextModal && (
                     <div className="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-6 cursor-pointer" onClick={() => setShowTextModal(null)}>
                     <div className="text-center w-full px-4">
-                        <p className="text-white text-4xl md:text-6xl font-black leading-relaxed mb-8 whitespace-pre-wrap select-text">{showTextModal}</p>
-                        <p className="text-gray-400 text-lg animate-pulse">(點擊任意處關閉)</p>
+                        <p className="text-white text-5xl md:text-7xl font-black leading-relaxed mb-8 whitespace-pre-wrap select-text">{showTextModal}</p>
+                        <p className="text-gray-400 text-xl animate-pulse">(點擊任意處關閉)</p>
                     </div>
                     </div>
                 )}
@@ -762,9 +764,9 @@
                                 <span className="text-xs mt-1 font-mono">{showCouponModal}</span>
                             </div>
                             
-                            <p className="font-black text-gray-800 text-xl">結帳前請出示此畫面</p>
+                            <p className="font-black text-gray-800 text-2xl">結帳前請出示此畫面</p>
                         </div>
-                        <button className="absolute -top-14 right-0 text-white"><X size={40}/></button>
+                        <button className="absolute -top-14 right-0 text-white"><X size={48}/></button>
                     </div>
                     </div>
                 )}
@@ -774,22 +776,22 @@
                     <div className="fixed inset-0 bg-black/80 z-[100] p-6 flex items-center justify-center" onClick={() => setShowTransportModal(false)}>
                     <div className="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl overflow-y-auto max-h-[85vh]" onClick={e => e.stopPropagation()}>
                         <h3 className="text-3xl font-black mb-6 flex items-center gap-3 text-blue-600"><Train size={32}/> 交通攻略</h3>
-                        <div className="space-y-6 text-base leading-relaxed text-gray-700">
+                        <div className="space-y-6 text-lg leading-relaxed text-gray-700">
                             <div className="p-5 bg-green-50 rounded-2xl border border-green-100">
-                                <p className="font-bold text-green-800 mb-2 flex items-center gap-2 text-lg"><Ticket size={20}/> Day 4 買什麼票？</p>
+                                <p className="font-bold text-green-800 mb-2 flex items-center gap-2 text-xl"><Ticket size={24}/> Day 4 買什麼票？</p>
                                 <p>週六去大阪城與梅田，請購買<strong>「大阪地鐵一日券 (Enjoy Eco Card)」</strong>(假日版僅 ¥620，超划算！)。</p>
-                                <p className="text-red-500 text-sm mt-2 font-bold">⚠️ 不需買大阪周遊卡(¥3300)，因為晚上去梅田藍天大廈看夜景不免費，反而不划算。</p>
+                                <p className="text-red-500 text-base mt-2 font-bold">⚠️ 不需買大阪周遊卡(¥3300)，因為晚上去梅田藍天大廈看夜景不免費，反而不划算。</p>
                             </div>
                             <div className="p-5 bg-blue-50 rounded-2xl border border-blue-100">
-                                <p className="font-bold text-blue-800 mb-2 text-lg">ICOCA (西瓜卡)</p>
+                                <p className="font-bold text-blue-800 mb-2 text-xl">ICOCA (西瓜卡)</p>
                                 <p>Day 1 (機場)、Day 2 (奈良)、Day 3 (USJ)、Day 5 (機場) 全部直接刷 ICOCA 最方便！</p>
                             </div>
                             <div className="p-5 bg-red-50 rounded-2xl border border-red-100">
-                                <p className="font-bold text-red-800 mb-2 flex items-center gap-2 text-lg"><Clock size={20}/> 行程提醒</p>
+                                <p className="font-bold text-red-800 mb-2 flex items-center gap-2 text-xl"><Clock size={24}/> 行程提醒</p>
                                 <p>D1 抵達時間尷尬，建議在市區吃好料再 Check-in，不要直接衝奈良(時間不夠)。</p>
                             </div>
                         </div>
-                        <button onClick={() => setShowTransportModal(false)} className="w-full mt-8 py-5 bg-gray-900 text-white rounded-2xl font-black text-lg">完全理解！</button>
+                        <button onClick={() => setShowTransportModal(false)} className="w-full mt-8 py-5 bg-gray-900 text-white rounded-2xl font-black text-xl">完全理解！</button>
                     </div>
                     </div>
                 )}
@@ -800,31 +802,31 @@
                     <div className="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl" onClick={e => e.stopPropagation()}>
                         <h3 className="text-3xl font-black mb-6 flex items-center gap-3 text-indigo-600"><Home size={32}/> 住宿與周邊</h3>
                         <div className="p-5 bg-gray-50 rounded-2xl border border-gray-200 mb-6">
-                            <h4 className="font-black text-xl">e-stay ebisu Osaka</h4>
-                            <p className="text-gray-600 text-base mt-1">惠美須町站步行 2 分鐘</p>
+                            <h4 className="font-black text-2xl">e-stay ebisu Osaka</h4>
+                            <p className="text-gray-600 text-lg mt-1">惠美須町站步行 2 分鐘</p>
                             <hr className="my-4"/>
-                            <p className="text-sm text-gray-500">出門左轉就是通天閣，生活機能極佳。</p>
+                            <p className="text-base text-gray-500">出門左轉就是通天閣，生活機能極佳。</p>
                         </div>
                         
                         <div className="grid grid-cols-1 gap-4">
-                            <button onClick={() => openGoogleMaps("e-stay ebisu Osaka")} className="py-4 bg-indigo-600 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2">
-                                <MapPin size={24}/> 導航回民宿
+                            <button onClick={() => openGoogleMaps("e-stay ebisu Osaka")} className="py-4 bg-indigo-600 text-white rounded-2xl font-bold text-xl flex items-center justify-center gap-2">
+                                <MapPin size={28}/> 導航回民宿
                             </button>
-                            <button onClick={() => setShowTextModal("〒556-0003\n大阪府大阪市浪速区恵美須西2-9-18\ne-stay ebisu Osaka")} className="py-4 bg-indigo-50 text-indigo-700 rounded-2xl font-bold text-lg">
+                            <button onClick={() => setShowTextModal("〒556-0003\n大阪府大阪市浪速区恵美須西2-9-18\ne-stay ebisu Osaka")} className="py-4 bg-indigo-50 text-indigo-700 rounded-2xl font-bold text-xl">
                                 顯示地址 (給司機看)
                             </button>
                             <div className="grid grid-cols-2 gap-4 mt-2">
-                                <button onClick={() => openGoogleMaps("Super Tamade Ebisucho")} className="py-4 bg-yellow-400 text-yellow-900 rounded-2xl font-bold text-base flex flex-col items-center justify-center gap-1">
-                                    <ShoppingBag size={24}/> <span>玉出超市</span>
-                                    <span className="text-xs opacity-75">24H便宜</span>
+                                <button onClick={() => openGoogleMaps("Super Tamade Ebisucho")} className="py-4 bg-yellow-400 text-yellow-900 rounded-2xl font-bold text-lg flex flex-col items-center justify-center gap-1">
+                                    <ShoppingBag size={28}/> <span>玉出超市</span>
+                                    <span className="text-sm opacity-75">24H便宜</span>
                                 </button>
-                                <button onClick={() => openGoogleMaps("Osaka Kizu Wholesale Market")} className="py-4 bg-blue-500 text-white rounded-2xl font-bold text-base flex flex-col items-center justify-center gap-1">
-                                    <Fish size={24}/> <span>木津市場</span>
-                                    <span className="text-xs opacity-75">在地早市</span>
+                                <button onClick={() => openGoogleMaps("Osaka Kizu Wholesale Market")} className="py-4 bg-blue-500 text-white rounded-2xl font-bold text-lg flex flex-col items-center justify-center gap-1">
+                                    <Fish size={28}/> <span>木津市場</span>
+                                    <span className="text-sm opacity-75">在地早市</span>
                                 </button>
                             </div>
                         </div>
-                        <button onClick={() => setShowHotelModal(false)} className="w-full mt-6 py-4 text-gray-400 font-bold text-base">關閉</button>
+                        <button onClick={() => setShowHotelModal(false)} className="w-full mt-6 py-4 text-gray-400 font-bold text-lg">關閉</button>
                     </div>
                     </div>
                 )}
@@ -843,27 +845,27 @@
                                         className="flex items-center gap-4 flex-1 cursor-pointer" 
                                         onClick={() => setShowCouponModal(map.img)}
                                     >
-                                        <MapIcon size={24}/>
-                                        <span className="font-bold text-lg">{map.name}</span>
-                                        <div className="flex items-center text-xs bg-white/50 px-3 py-1 rounded-full ml-2">
-                                            <Eye size={12} className="mr-1"/> 查看圖片
+                                        <MapIcon size={28}/>
+                                        <span className="font-bold text-xl">{map.name}</span>
+                                        <div className="flex items-center text-sm bg-white/50 px-3 py-1 rounded-full ml-2">
+                                            <Eye size={16} className="mr-1"/> 查看圖片
                                         </div>
                                     </div>
                                     
                                     {/* 右側：點擊開啟外部連結 */}
                                     <a href={map.link} target="_blank" className="p-2 -mr-2 text-current opacity-50 hover:opacity-100" title="開啟官方 PDF">
-                                        <ExternalLink size={24}/>
+                                        <ExternalLink size={28}/>
                                     </a>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="mt-8 p-4 bg-gray-50 rounded-2xl text-sm text-gray-500 border border-gray-200">
-                            <Info size={16} className="inline mr-1 mb-0.5"/>
+                        <div className="mt-8 p-4 bg-gray-50 rounded-2xl text-base text-gray-500 border border-gray-200">
+                            <Info size={20} className="inline mr-1 mb-0.5"/>
                             點擊左側文字可直接查看已下載的圖片，點擊右側箭頭可開啟官方 PDF。
                         </div>
 
-                        <button onClick={() => setShowMapModal(false)} className="bg-gray-100 px-6 py-4 rounded-2xl font-bold w-full mt-6 text-gray-500 text-lg">關閉</button>
+                        <button onClick={() => setShowMapModal(false)} className="bg-gray-100 px-6 py-4 rounded-2xl font-bold w-full mt-6 text-gray-500 text-xl">關閉</button>
                     </div>
                     </div>
                 )}
