@@ -2,10 +2,10 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <!-- 1. 優化視窗設定 -->
+    <!-- 1. 優化視窗設定：禁止縮放、適配瀏海螢幕 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- 2. PWA 關鍵設定 -->
+    <!-- 2. PWA 關鍵設定：連結 manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#f97316">
@@ -58,6 +58,7 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
+            /* 全局字體稍微放大 */
             font-size: 19px; 
             line-height: 1.6;
         }
@@ -79,6 +80,7 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
+        /* 移除 Share，保留其他圖示 */
         import { 
             Plane, Train, Luggage, Camera, ShoppingBag, 
             Utensils, Moon, Ship, Star, Fish, Bird, Flame, 
@@ -99,6 +101,7 @@
             const [showCouponModal, setShowCouponModal] = useState(null);
             const [showTextModal, setShowTextModal] = useState(null);
             const [couponFilter, setCouponFilter] = useState('ALL');
+            const [isZoomed, setIsZoomed] = useState(false); // 新增：圖片放大狀態
 
             // --- 購物計算機 State ---
             const [cartItems, setCartItems] = useState([]);
@@ -258,11 +261,9 @@
                     ]
                     },
                     { time: "15:00", title: "民宿 Check-in", desc: "吃飽剛好進房放行李、稍微整理儀容。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" },
-                    
                     { time: "16:00", title: "通天閣 & 新世界散策", desc: "沒有行李一身輕，逛逛復古街道。", icon: <Camera/>, mapQuery: "Tsutenkaku" },
-                    
                     { time: "17:30", title: "阿倍野 HARUKAS 300", desc: "步行或地鐵一站至天王寺，欣賞絕美日落與夜景。", icon: <Moon/>, mapQuery: "Harukas 300" },
-                    
+                    /* 修改：18:30 晚餐，燒肉萬野 (替代已閉店的燒肉平和) */
                     { 
                     time: "18:30", title: "【晚餐建議】天王寺必吃", 
                     isMeal: true,
@@ -271,7 +272,7 @@
                         { name: "千房大阪燒", desc: "阿倍野 Q's Mall 店，經典大阪味。", tag: "經典必吃" }
                     ]
                     },
-                    
+                    /* 修改：20:00 逛 Bic Camera，注意21:00關門 */
                     { time: "20:00", title: "Bic Camera 阿倍野店", desc: "就在隔壁 Q's Mall 裡面！吃飽搬貨剛好，記得只營業到 21:00 喔！", icon: <ShoppingBag/>, mapQuery: "Bic Camera Abeno Q's Mall Store" },
                     { time: "21:30", title: "唐吉訶德 新世界店", desc: "就在通天閣旁，買完直接扛回民宿，超方便。", icon: <ShoppingBag/>, mapQuery: "MEGA Don Quijote Shinsekai" },
                     { time: "23:00", title: "返回民宿休息", desc: "唐吉訶德過個馬路就到家，整理戰利品準備睡覺。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" }
@@ -514,7 +515,7 @@
                         <h1 className="text-3xl font-black italic tracking-tighter flex items-center gap-2">
                         OSAKA 2026 <span className="text-yellow-300 text-base bg-black/20 px-2 rounded">PRO</span>
                         </h1>
-                        <p className="text-sm font-bold opacity-80 mt-1">資深導遊修訂版 v4.4 (完美回歸版)</p>
+                        <p className="text-sm font-bold opacity-80 mt-1">資深導遊修訂版 v4.6 (可放大地圖版)</p>
                     </div>
                     {/* 修改：移除 Train 按鈕，只保留 Home 與 Map */}
                     <div className="flex gap-2">
@@ -792,32 +793,35 @@
                     </div>
                 )}
 
-                {/* 優惠券 Barcode Modal (支援圖片) */}
+                {/* 優惠券/地圖 圖片 Modal (支援縮放) */}
                 {showCouponModal && (
-                    <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-6" onClick={() => setShowCouponModal(null)}>
-                    <div className="relative w-full max-w-md">
-                        <div className="bg-white p-6 rounded-3xl text-center shadow-2xl">
-                            {/* 修改：顯示真實圖片 */}
-                            <img 
-                                src={showCouponModal} 
-                                alt="Coupon" 
-                                className="w-full h-auto rounded-lg mb-4 object-contain max-h-[70vh]"
-                                onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'flex';
-                                }}
-                            />
-                            {/* 圖片載入失敗時顯示替代內容 */}
-                            <div className="hidden w-full aspect-square bg-gray-100 rounded-2xl flex-col items-center justify-center mb-4 text-gray-400">
+                    <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-0" onClick={() => { setShowCouponModal(null); setIsZoomed(false); }}>
+                        <div className={`relative ${isZoomed ? 'w-full h-full overflow-auto flex items-start justify-center' : 'w-full max-w-md p-6'}`}>
+                             {/* 圖片載入失敗時顯示替代內容 */}
+                            <div className="hidden w-full aspect-square bg-gray-100 rounded-2xl flex-col items-center justify-center mb-4 text-gray-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                                 <ImageIcon size={64} className="mb-2"/>
                                 <span className="text-sm">圖片載入中或未上傳</span>
                                 <span className="text-xs mt-1 font-mono">{showCouponModal}</span>
                             </div>
+
+                            <img 
+                                src={showCouponModal} 
+                                alt="Zoomable Content" 
+                                className={`transition-all duration-300 ${isZoomed ? 'min-w-[150%] h-auto cursor-zoom-out' : 'w-full h-auto max-h-[70vh] object-contain rounded-lg cursor-zoom-in'}`}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsZoomed(!isZoomed);
+                                }}
+                                onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.previousSibling.style.display = 'flex';
+                                    e.target.previousSibling.classList.remove('hidden');
+                                }}
+                            />
                             
-                            <p className="font-black text-gray-800 text-2xl">結帳前請出示此畫面</p>
+                            {!isZoomed && <p className="absolute bottom-10 left-0 right-0 text-center text-gray-400 text-lg font-bold pointer-events-none">點擊圖片可放大/縮小</p>}
+                            <button className="fixed top-4 right-4 text-white drop-shadow-md z-[110]"><X size={48}/></button>
                         </div>
-                        <button className="absolute -top-14 right-0 text-white"><X size={48}/></button>
-                    </div>
                     </div>
                 )}
 
