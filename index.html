@@ -261,6 +261,7 @@
                     { time: "15:00", title: "民宿 Check-in", desc: "吃飽剛好進房放行李、稍微整理儀容。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" },
                     { time: "16:00", title: "通天閣 & 新世界散策", desc: "沒有行李一身輕，逛逛復古街道。", icon: <Camera/>, mapQuery: "Tsutenkaku" },
                     { time: "17:30", title: "阿倍野 HARUKAS 300", desc: "步行或地鐵一站至天王寺，欣賞絕美日落與夜景。", icon: <Moon/>, mapQuery: "Harukas 300" },
+                    
                     { 
                     time: "18:30", title: "【晚餐建議】天王寺必吃", 
                     isMeal: true,
@@ -269,6 +270,7 @@
                         { name: "千房大阪燒", desc: "阿倍野 Q's Mall 店，經典大阪味。", tag: "經典必吃" }
                     ]
                     },
+                    
                     { time: "20:00", title: "Bic Camera 阿倍野店", desc: "就在隔壁 Q's Mall 裡面！吃飽搬貨剛好，記得只營業到 21:00 喔！", icon: <ShoppingBag/>, mapQuery: "Bic Camera Abeno Q's Mall Store" },
                     { time: "21:30", title: "唐吉訶德 新世界店", desc: "就在通天閣旁，買完直接扛回民宿，超方便。", icon: <ShoppingBag/>, mapQuery: "MEGA Don Quijote Shinsekai" },
                     { time: "23:00", title: "返回民宿休息", desc: "唐吉訶德過個馬路就到家，整理戰利品準備睡覺。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" }
@@ -292,10 +294,14 @@
                     ]
                     },
                     { time: "13:30", title: "搭車返回大阪難波", desc: "【關鍵時刻】要趕回去神社跟貓頭鷹，這時間得上車。", icon: <Train/>, mapQuery: "Kintetsu Nara Station" },
+                    
+                    /* 修改：把難波八阪神社放回來 */
                     { time: "14:30", title: "難波八阪神社", desc: "巨大獅子頭必拍！離難波站走路約10分。", icon: <Camera/>, mapQuery: "Namba Yasaka Shrine" },
+                    
                     { time: "15:30", title: "搭車前往貓頭鷹咖啡", desc: "直接搭計程車(約10分，車資¥1200左右)，多人分擔很划算。", icon: <Bird/>, mapQuery: "Happy Owl Cafe chouette Osaka" },
                     { time: "16:00", title: "Happy Owl Cafe chouette", desc: "【預約1hr】享受完整的療癒時光，零距離互動。", icon: <Star/>, mapQuery: "Happy Owl Cafe chouette Osaka" },
                     { time: "17:30", title: "心齋橋 & 道頓堀", desc: "從咖啡廳一路往南逛，終點是跑跑人看板。", icon: <ShoppingBag/>, mapQuery: "Dotonbori Glico Sign" },
+                    
                     { 
                     time: "18:00", title: "【晚餐建議】燒肉之夜", 
                     isMeal: true,
@@ -304,6 +310,7 @@
                         { name: "國產牛燒肉 Aburiya", desc: "需提前預約，肉質佳。", tag: "高評價" }
                     ]
                     },
+                    
                     { time: "20:00", title: "Bic Camera 難波店", desc: "吃飽散步去逛電器！就在千日前通，注意 21:00 關門。", icon: <ShoppingBag/>, mapQuery: "Bic Camera Namba Store" },
                     { time: "22:00", title: "返回民宿休息", desc: "吃飽從難波站搭地鐵(日本橋→惠美須町)或計程車回民宿，養精蓄銳。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" }
                 ]
@@ -433,6 +440,8 @@
                     items: [
                         { tw: "可以免稅嗎？", jp: "免税できますか？", roma: "Menzei dekimasu ka?" },
                         { tw: "請分開包裝。", jp: "別々に包んでください。", roma: "Betsubetsu ni tsutsunde kudasai." },
+                        /* 新增：衣服另外裝、藥妝封袋 */
+                        { tw: "請幫我把衣服類另外裝（一般物品），藥妝類封袋（消耗品）。", jp: "服（一般物品）は別にして、消耗品だけ免税袋に入れてください。", roma: "Fuku (ippan buppin) wa betsu ni shite, shoumouhin dake menzei-bukuro ni irete kudasai." },
                         { tw: "我有優惠券。", jp: "クーポンを持っています。", roma: "Kuupon o motte imasu." },
                         { tw: "(USJ) 請將爆米花與桶子分開裝。", jp: "ポップコーンとバケツは別々にしてください。", roma: "Poppukoon to baketsu wa betsubetsu ni shite kudasai." }
                     ]
@@ -506,7 +515,7 @@
                         <h1 className="text-3xl font-black italic tracking-tighter flex items-center gap-2">
                         OSAKA 2026 <span className="text-yellow-300 text-base bg-black/20 px-2 rounded">PRO</span>
                         </h1>
-                        <p className="text-sm font-bold opacity-80 mt-1">資深導遊修訂版 v4.7 (長輩手指通加強版)</p>
+                        <p className="text-sm font-bold opacity-80 mt-1">資深導遊修訂版 v4.8 (購物手指通加強版)</p>
                     </div>
                     {/* 修改：移除 Train 按鈕，只保留 Home 與 Map */}
                     <div className="flex gap-2">
