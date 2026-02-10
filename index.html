@@ -58,7 +58,6 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
-            /* 全局字體稍微放大 */
             font-size: 19px; 
             line-height: 1.6;
         }
@@ -80,7 +79,6 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
-        /* 移除 Share，保留其他圖示 */
         import { 
             Plane, Train, Luggage, Camera, ShoppingBag, 
             Utensils, Moon, Ship, Star, Fish, Bird, Flame, 
@@ -101,7 +99,7 @@
             const [showCouponModal, setShowCouponModal] = useState(null);
             const [showTextModal, setShowTextModal] = useState(null);
             const [couponFilter, setCouponFilter] = useState('ALL');
-            const [isZoomed, setIsZoomed] = useState(false); // 新增：圖片放大狀態
+            const [isZoomed, setIsZoomed] = useState(false);
 
             // --- 購物計算機 State ---
             const [cartItems, setCartItems] = useState([]);
@@ -263,7 +261,6 @@
                     { time: "15:00", title: "民宿 Check-in", desc: "吃飽剛好進房放行李、稍微整理儀容。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" },
                     { time: "16:00", title: "通天閣 & 新世界散策", desc: "沒有行李一身輕，逛逛復古街道。", icon: <Camera/>, mapQuery: "Tsutenkaku" },
                     { time: "17:30", title: "阿倍野 HARUKAS 300", desc: "步行或地鐵一站至天王寺，欣賞絕美日落與夜景。", icon: <Moon/>, mapQuery: "Harukas 300" },
-                    /* 修改：18:30 晚餐，燒肉萬野 (替代已閉店的燒肉平和) */
                     { 
                     time: "18:30", title: "【晚餐建議】天王寺必吃", 
                     isMeal: true,
@@ -272,7 +269,6 @@
                         { name: "千房大阪燒", desc: "阿倍野 Q's Mall 店，經典大阪味。", tag: "經典必吃" }
                     ]
                     },
-                    /* 修改：20:00 逛 Bic Camera，注意21:00關門 */
                     { time: "20:00", title: "Bic Camera 阿倍野店", desc: "就在隔壁 Q's Mall 裡面！吃飽搬貨剛好，記得只營業到 21:00 喔！", icon: <ShoppingBag/>, mapQuery: "Bic Camera Abeno Q's Mall Store" },
                     { time: "21:30", title: "唐吉訶德 新世界店", desc: "就在通天閣旁，買完直接扛回民宿，超方便。", icon: <ShoppingBag/>, mapQuery: "MEGA Don Quijote Shinsekai" },
                     { time: "23:00", title: "返回民宿休息", desc: "唐吉訶德過個馬路就到家，整理戰利品準備睡覺。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" }
@@ -295,15 +291,11 @@
                         { name: "中谷堂搗麻糬", desc: "買個點心帶著走，節省時間。", tag: "必看" }
                     ]
                     },
-                    { time: "13:30", title: "搭車返回大阪難波", desc: "【關鍵時刻】要趕回去跟貓頭鷹約會，這時間得上車。", icon: <Train/>, mapQuery: "Kintetsu Nara Station" },
-                    
-                    /* 修改：把難波八阪神社放回來 */
+                    { time: "13:30", title: "搭車返回大阪難波", desc: "【關鍵時刻】要趕回去神社跟貓頭鷹，這時間得上車。", icon: <Train/>, mapQuery: "Kintetsu Nara Station" },
                     { time: "14:30", title: "難波八阪神社", desc: "巨大獅子頭必拍！離難波站走路約10分。", icon: <Camera/>, mapQuery: "Namba Yasaka Shrine" },
-                    
                     { time: "15:30", title: "搭車前往貓頭鷹咖啡", desc: "直接搭計程車(約10分，車資¥1200左右)，多人分擔很划算。", icon: <Bird/>, mapQuery: "Happy Owl Cafe chouette Osaka" },
                     { time: "16:00", title: "Happy Owl Cafe chouette", desc: "【預約1hr】享受完整的療癒時光，零距離互動。", icon: <Star/>, mapQuery: "Happy Owl Cafe chouette Osaka" },
                     { time: "17:30", title: "心齋橋 & 道頓堀", desc: "從咖啡廳一路往南逛，終點是跑跑人看板。", icon: <ShoppingBag/>, mapQuery: "Dotonbori Glico Sign" },
-                    
                     { 
                     time: "18:00", title: "【晚餐建議】燒肉之夜", 
                     isMeal: true,
@@ -312,7 +304,6 @@
                         { name: "國產牛燒肉 Aburiya", desc: "需提前預約，肉質佳。", tag: "高評價" }
                     ]
                     },
-                    
                     { time: "20:00", title: "Bic Camera 難波店", desc: "吃飽散步去逛電器！就在千日前通，注意 21:00 關門。", icon: <ShoppingBag/>, mapQuery: "Bic Camera Namba Store" },
                     { time: "22:00", title: "返回民宿休息", desc: "吃飽從難波站搭地鐵(日本橋→惠美須町)或計程車回民宿，養精蓄銳。", icon: <Bed/>, mapQuery: "e-stay ebisu Osaka" }
                 ]
@@ -401,7 +392,6 @@
                 { id: 6, name: "YAMADA 電機", discount: "10% + 7%", type: "電器", locations: ["難波"], img: "yamada.jpg" }
             ];
 
-            // 新增：地圖資料 (整合舊版功能) - 加上圖片檔案連結
             const maps = [
                 { name: "JR 西日本路線圖", link: "https://www.westjr.co.jp/global/tc/timetable/pdf/map_kansai.pdf", img: "map_jr.jpg", color: "bg-blue-50 border-blue-200 text-blue-800" },
                 { name: "大阪地鐵路線圖", link: "https://subway.osakametro.co.jp/en/guide/routemap.php", img: "map_metro.jpg", color: "bg-red-50 border-red-200 text-red-800" },
@@ -413,20 +403,14 @@
                     category: "交通 / 計程車 (往USJ必備)",
                     items: [
                         { tw: "請載我去民宿 (給司機看地址)。", jp: "この住所までお願いします：〒556-0003 大阪府大阪市浪速区恵美須西2-9-18", roma: "Osaka-shi Naniwa-ku Ebisunishi 2-9-18" },
+                        { tw: "ICOCA大人跟小孩外國人限定版要去哪邊辦?", jp: "外国人限定のICOCA（KANSAI ONE PASS）はどこで買えますか？大人用と子供用が欲しいです。", roma: "Gaikokujin gentei no ICOCA wa doko de kaemasu ka?" },
                         { tw: "請載我們去環球影城，請走高速公路。", jp: "ユニバーサル・スタジオ・ジャパンまで、高速道路を使ってお願いします。", roma: "USJ made, kousoku o tsukatte onegaishimasu." },
                         { tw: "請載我去貓頭鷹咖啡(長堀橋)。", jp: "長堀橋の「フクロウカフェ chouette」までお願いします。", roma: "Nagahoribashi no Fukurou Cafe chouette made onegaishimasu." },
                         { tw: "請問多少錢？", jp: "いくらですか？", roma: "Ikura desu ka?" },
                         { tw: "可以使用 ICOCA 卡嗎？", jp: "ICOCAは使えますか？", roma: "ICOCA wa tsukaemasu ka?" }
                     ]
                 },
-                {
-                    category: "住宿 / 飯店",
-                    items: [
-                        { tw: "我要辦理入住。", jp: "チェックインをお願いします。", roma: "Chekkuin o onegaishimasu." },
-                        { tw: "可以先寄放行李嗎？", jp: "荷物を預かってもらえますか？", roma: "Nimotsu o azukatte moraemasu ka?" },
-                        { tw: "請問 Wi-Fi 密碼是？", jp: "Wi-Fiのパスワードを教えてください。", roma: "Wi-Fi no pasuwaado o oshiete kudasai." }
-                    ]
-                },
+                /* 移除住宿手指通 */
                 {
                     category: "餐廳進店 / 候位",
                     items: [
@@ -451,6 +435,13 @@
                         { tw: "請分開包裝。", jp: "別々に包んでください。", roma: "Betsubetsu ni tsutsunde kudasai." },
                         { tw: "我有優惠券。", jp: "クーポンを持っています。", roma: "Kuupon o motte imasu." },
                         { tw: "(USJ) 請將爆米花與桶子分開裝。", jp: "ポップコーンとバケツは別々にしてください。", roma: "Poppukoon to baketsu wa betsubetsu ni shite kudasai." }
+                    ]
+                },
+                {
+                    category: "藥妝店詢問 (護具)",
+                    items: [
+                        { tw: "護腰要用黏的，不要有彈性，是哪一種?", jp: "マジックテープで固定する硬めの腰サポーターはどれですか？（ゴムタイプではなく）", roma: "Majikku-teepu de kotei suru katame no koshi sapootaa wa dore desu ka?" },
+                        { tw: "護膝有溫熱款的嗎?", jp: "保温（温熱）効果のある膝サポーターはありますか？", roma: "Hoon kouka no aru hiza sapootaa wa arimasu ka?" }
                     ]
                 }
             ];
@@ -515,7 +506,7 @@
                         <h1 className="text-3xl font-black italic tracking-tighter flex items-center gap-2">
                         OSAKA 2026 <span className="text-yellow-300 text-base bg-black/20 px-2 rounded">PRO</span>
                         </h1>
-                        <p className="text-sm font-bold opacity-80 mt-1">資深導遊修訂版 v4.6 (可放大地圖版)</p>
+                        <p className="text-sm font-bold opacity-80 mt-1">資深導遊修訂版 v4.7 (長輩手指通加強版)</p>
                     </div>
                     {/* 修改：移除 Train 按鈕，只保留 Home 與 Map */}
                     <div className="flex gap-2">
